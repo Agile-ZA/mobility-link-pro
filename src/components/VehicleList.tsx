@@ -1,9 +1,9 @@
-
 import { useMemo } from "react";
 import { useVehicles } from "@/hooks/useVehicles";
 import { Vehicle } from "@/types/vehicle";
 import { useAuth } from "@/hooks/useAuth";
 import VehicleCard from "./VehicleCard";
+import FleetAdminPanel from "./FleetAdminPanel";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
@@ -14,7 +14,7 @@ interface VehicleListProps {
 }
 
 const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
-  const { vehicles, loading } = useVehicles();
+  const { vehicles, loading, fetchVehicles } = useVehicles();
   const { user } = useAuth();
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("available");
@@ -64,6 +64,11 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
           <h2 className="text-3xl font-bold text-slate-900">Fleet Overview</h2>
           <p className="text-slate-600 mt-1">Monitor and manage your corporate vehicle fleet</p>
         </div>
+
+        <FleetAdminPanel 
+          onVehicleAdded={fetchVehicles}
+          onEditVehicle={(vehicle) => onVehicleSelect(vehicle)}
+        />
 
         {userVehicle && (
           <Card className="border-blue-200 bg-blue-50">

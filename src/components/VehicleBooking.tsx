@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Vehicle } from "@/types/vehicle";
 import { useVehicles } from "@/hooks/useVehicles";
@@ -13,9 +12,10 @@ import { Camera, User, Calendar } from "lucide-react";
 
 interface VehicleBookingProps {
   vehicle: Vehicle;
+  onVehicleUpdate?: () => void;
 }
 
-const VehicleBooking = ({ vehicle }: VehicleBookingProps) => {
+const VehicleBooking = ({ vehicle, onVehicleUpdate }: VehicleBookingProps) => {
   const [showReturnForm, setShowReturnForm] = useState(false);
   const [odometer, setOdometer] = useState(vehicle.mileage?.toString() || "");
   const [operatingHours, setOperatingHours] = useState(vehicle.operating_hours?.toString() || "");
@@ -44,6 +44,12 @@ const VehicleBooking = ({ vehicle }: VehicleBookingProps) => {
         title: "Vehicle Booked Successfully",
         description: `${vehicle.registration_number} has been booked to you.`,
       });
+      // Trigger page update
+      if (onVehicleUpdate) {
+        onVehicleUpdate();
+      } else {
+        window.location.reload();
+      }
     } else {
       toast({
         title: "Booking Failed",
@@ -84,6 +90,13 @@ const VehicleBooking = ({ vehicle }: VehicleBookingProps) => {
       setOperatingHours(vehicle.operating_hours?.toString() || "");
       setComments("");
       setImageFile(null);
+      
+      // Trigger page update
+      if (onVehicleUpdate) {
+        onVehicleUpdate();
+      } else {
+        window.location.reload();
+      }
     } else {
       toast({
         title: "Return Failed",
@@ -270,8 +283,9 @@ const VehicleBooking = ({ vehicle }: VehicleBookingProps) => {
                   <Button 
                     onClick={handleReturnVehicle}
                     className="flex-1 bg-slate-900 hover:bg-slate-800"
+                    disabled={isLoading}
                   >
-                    Confirm Return
+                    {isLoading ? 'Returning...' : 'Confirm Return'}
                   </Button>
                   <Button 
                     onClick={() => setShowReturnForm(false)}

@@ -24,7 +24,7 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
   console.log("User role check:", { isFleetAdmin, loading }); // Debug log
 
   const handleVehicleUpdated = () => {
-    // Refresh the page or refetch data
+    // Refresh the page to get updated vehicle data
     window.location.reload();
   };
 
@@ -58,7 +58,7 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
             </TabsContent>
 
             <TabsContent value="booking" className="mt-6">
-              <VehicleBooking vehicle={vehicle} />
+              <VehicleBooking vehicle={vehicle} onVehicleUpdate={handleVehicleUpdated} />
             </TabsContent>
             
             <TabsContent value="inspection" className="mt-6">

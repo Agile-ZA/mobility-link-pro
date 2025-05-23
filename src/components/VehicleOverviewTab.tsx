@@ -45,21 +45,6 @@ const VehicleOverviewTab = ({ isFleetAdmin, setActiveTab, vehicleStatus }: Vehic
             <span>Maintenance Request</span>
           </Button>
         </div>
-        
-        {isFleetAdmin && (
-          <div className="mt-4 pt-4 border-t border-slate-200">
-            <div className="text-center">
-              <Button 
-                onClick={() => setActiveTab("admin")}
-                variant="outline"
-                className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
-              >
-                <span className="text-xl mr-2">⚙️</span>
-                Admin Controls
-              </Button>
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

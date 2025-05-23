@@ -21,8 +21,8 @@ export const useBookingHistory = (vehicleId?: string) => {
         .from('booking_history')
         .select(`
           *,
-          profile:profiles!booking_history_user_id_fkey(full_name, email),
-          vehicle:vehicles!booking_history_vehicle_id_fkey(registration_number, make, model)
+          profiles!inner(full_name, email),
+          vehicles!inner(registration_number, make, model)
         `)
         .order('booked_at', { ascending: false });
 
@@ -35,7 +35,14 @@ export const useBookingHistory = (vehicleId?: string) => {
 
       if (error) throw error;
 
-      setBookingHistory(data || []);
+      // Transform the data to match our BookingHistory type
+      const transformedData: BookingHistory[] = (data || []).map(record => ({
+        ...record,
+        profile: record.profiles,
+        vehicle: record.vehicles
+      }));
+
+      setBookingHistory(transformedData);
     } catch (error) {
       console.error('Error fetching booking history:', error);
       toast({

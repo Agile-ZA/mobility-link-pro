@@ -14,7 +14,7 @@ interface VehicleListProps {
 }
 
 const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
-  const { vehicles, loading, fetchVehicles } = useVehicles();
+  const { vehicles, loading } = useVehicles();
   const { user } = useAuth();
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("available");
@@ -64,11 +64,6 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
           <h2 className="text-3xl font-bold text-slate-900">Fleet Overview</h2>
           <p className="text-slate-600 mt-1">Monitor and manage your corporate vehicle fleet</p>
         </div>
-
-        <FleetAdminPanel 
-          onVehicleAdded={fetchVehicles}
-          onEditVehicle={(vehicle) => onVehicleSelect(vehicle)}
-        />
 
         {userVehicle && (
           <Card className="border-blue-200 bg-blue-50">

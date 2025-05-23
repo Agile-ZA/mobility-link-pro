@@ -6,6 +6,7 @@ import VehicleHeader from "./VehicleHeader";
 import VehicleInfoCard from "./VehicleInfoCard";
 import VehicleOverviewTab from "./VehicleOverviewTab";
 import BookingHistoryTable from "./BookingHistoryTable";
+import InspectionForm from "./InspectionForm";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useBookingHistory } from "@/hooks/useBookingHistory";
 import { useState } from "react";
@@ -17,6 +18,7 @@ interface VehicleDetailProps {
 
 const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [showInspection, setShowInspection] = useState(false);
   const { isFleetAdmin, loading } = useUserRole();
   const { bookingHistory, loading: historyLoading } = useBookingHistory(vehicle.id);
 
@@ -27,8 +29,25 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
     window.location.reload();
   };
 
+  const handleInspectionClick = () => {
+    setShowInspection(true);
+  };
+
+  const handleInspectionBack = () => {
+    setShowInspection(false);
+  };
+
   if (loading) {
     return <div>Loading...</div>;
+  }
+
+  if (showInspection) {
+    return (
+      <div className="space-y-4">
+        <VehicleHeader vehicle={vehicle} onBack={handleInspectionBack} />
+        <InspectionForm vehicle={vehicle} />
+      </div>
+    );
   }
 
   return (
@@ -46,7 +65,12 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
             </TabsList>
             
             <TabsContent value="overview" className="space-y-4 mt-4">
-              <VehicleOverviewTab isFleetAdmin={isFleetAdmin} setActiveTab={setActiveTab} vehicleStatus={vehicle.status} />
+              <VehicleOverviewTab 
+                isFleetAdmin={isFleetAdmin} 
+                setActiveTab={setActiveTab} 
+                vehicleStatus={vehicle.status}
+                onInspectionClick={handleInspectionClick}
+              />
             </TabsContent>
 
             {isFleetAdmin && (

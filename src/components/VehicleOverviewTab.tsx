@@ -7,9 +7,10 @@ interface VehicleOverviewTabProps {
   isFleetAdmin: boolean;
   setActiveTab: (tab: string) => void;
   vehicleStatus?: 'available' | 'booked' | 'maintenance' | 'damaged';
+  onInspectionClick: () => void;
 }
 
-const VehicleOverviewTab = ({ isFleetAdmin, setActiveTab, vehicleStatus }: VehicleOverviewTabProps) => {
+const VehicleOverviewTab = ({ isFleetAdmin, setActiveTab, vehicleStatus, onInspectionClick }: VehicleOverviewTabProps) => {
   const isBooked = vehicleStatus === 'booked';
   const bookingButtonText = isBooked ? 'Return Vehicle' : 'Book Vehicle';
   const bookingButtonColor = isBooked ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700';
@@ -29,7 +30,7 @@ const VehicleOverviewTab = ({ isFleetAdmin, setActiveTab, vehicleStatus }: Vehic
             <span className="text-sm">{bookingButtonText}</span>
           </Button>
           <Button 
-            onClick={() => setActiveTab("inspection")}
+            onClick={onInspectionClick}
             variant="outline"
             className="h-16 flex flex-col items-center justify-center gap-1 border-slate-300 hover:bg-slate-50"
           >

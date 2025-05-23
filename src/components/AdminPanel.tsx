@@ -7,10 +7,9 @@ import AddVehicleForm from "./AddVehicleForm";
 import VehicleEditForm from "./VehicleEditForm";
 import AdminHeader from "./admin/AdminHeader";
 import AdminStats from "./admin/AdminStats";
-import AdminActions from "./admin/AdminActions";
 import AdminVehicleTable from "./admin/AdminVehicleTable";
 import UserRoleManagement from "./admin/UserRoleManagement";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { Vehicle } from "@/types/vehicle";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
@@ -32,7 +31,7 @@ const AdminPanel = ({ onNavigateBack }: AdminPanelProps) => {
 
   const handleEditSuccess = () => {
     setEditingVehicle(null);
-    fetchVehicles(); // This should refresh the vehicle list
+    fetchVehicles();
   };
 
   const stats = {
@@ -102,13 +101,18 @@ const AdminPanel = ({ onNavigateBack }: AdminPanelProps) => {
         </TabsList>
 
         <TabsContent value="vehicles" className="space-y-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <AdminActions 
-              onAddVehicle={() => setShowAddForm(true)}
-              onManageUsers={() => setActiveTab("users")}
-              showUserManagement={false} // Hide the user management button in this tab
-              stats={stats}
-            />
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900">Vehicle Fleet</h3>
+              <p className="text-sm text-slate-600">Manage all vehicles in your fleet</p>
+            </div>
+            <Button 
+              onClick={() => setShowAddForm(true)}
+              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+            >
+              <Plus className="w-4 h-4" />
+              Add New Vehicle
+            </Button>
           </div>
 
           <AdminVehicleTable 

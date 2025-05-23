@@ -8,9 +8,10 @@ interface VehicleOverviewTabProps {
   setActiveTab: (tab: string) => void;
   vehicleStatus?: 'available' | 'booked' | 'maintenance' | 'damaged';
   onInspectionClick: () => void;
+  onMaintenanceClick: () => void;
 }
 
-const VehicleOverviewTab = ({ isFleetAdmin, setActiveTab, vehicleStatus, onInspectionClick }: VehicleOverviewTabProps) => {
+const VehicleOverviewTab = ({ isFleetAdmin, setActiveTab, vehicleStatus, onInspectionClick, onMaintenanceClick }: VehicleOverviewTabProps) => {
   const isBooked = vehicleStatus === 'booked';
   const bookingButtonText = isBooked ? 'Return Vehicle' : 'Book Vehicle';
   const bookingButtonColor = isBooked ? 'bg-green-600 hover:bg-green-700' : 'bg-blue-600 hover:bg-blue-700';
@@ -39,7 +40,7 @@ const VehicleOverviewTab = ({ isFleetAdmin, setActiveTab, vehicleStatus, onInspe
           </Button>
           <Button 
             variant="outline"
-            onClick={() => setActiveTab("maintenance")}
+            onClick={onMaintenanceClick}
             className="h-16 flex flex-col items-center justify-center gap-1 border-slate-300 hover:bg-slate-50"
           >
             <Wrench className="w-5 h-5" />

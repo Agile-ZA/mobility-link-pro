@@ -7,6 +7,7 @@ import VehicleInfoCard from "./VehicleInfoCard";
 import VehicleOverviewTab from "./VehicleOverviewTab";
 import BookingHistoryTable from "./BookingHistoryTable";
 import InspectionForm from "./InspectionForm";
+import MaintenanceForm from "./MaintenanceForm";
 import { useUserRole } from "@/hooks/useUserRole";
 import { useBookingHistory } from "@/hooks/useBookingHistory";
 import { useState } from "react";
@@ -19,6 +20,7 @@ interface VehicleDetailProps {
 const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
   const [activeTab, setActiveTab] = useState("overview");
   const [showInspection, setShowInspection] = useState(false);
+  const [showMaintenance, setShowMaintenance] = useState(false);
   const { isFleetAdmin, loading } = useUserRole();
   const { bookingHistory, loading: historyLoading } = useBookingHistory(vehicle.id);
 
@@ -37,6 +39,14 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
     setShowInspection(false);
   };
 
+  const handleMaintenanceClick = () => {
+    setShowMaintenance(true);
+  };
+
+  const handleMaintenanceBack = () => {
+    setShowMaintenance(false);
+  };
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -46,6 +56,15 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
       <div className="space-y-4">
         <VehicleHeader vehicle={vehicle} onBack={handleInspectionBack} />
         <InspectionForm vehicle={vehicle} onCancel={handleInspectionBack} />
+      </div>
+    );
+  }
+
+  if (showMaintenance) {
+    return (
+      <div className="space-y-4">
+        <VehicleHeader vehicle={vehicle} onBack={handleMaintenanceBack} />
+        <MaintenanceForm vehicle={vehicle} onCancel={handleMaintenanceBack} />
       </div>
     );
   }
@@ -70,6 +89,7 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
                 setActiveTab={setActiveTab} 
                 vehicleStatus={vehicle.status}
                 onInspectionClick={handleInspectionClick}
+                onMaintenanceClick={handleMaintenanceClick}
               />
             </TabsContent>
 

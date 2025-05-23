@@ -8,12 +8,14 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { Wrench, X } from "lucide-react";
 
 interface MaintenanceFormProps {
   vehicle: Vehicle;
+  onCancel?: () => void;
 }
 
-const MaintenanceForm = ({ vehicle }: MaintenanceFormProps) => {
+const MaintenanceForm = ({ vehicle, onCancel }: MaintenanceFormProps) => {
   const [maintenanceType, setMaintenanceType] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<"low" | "medium" | "high">("medium");
@@ -69,8 +71,8 @@ const MaintenanceForm = ({ vehicle }: MaintenanceFormProps) => {
     console.log("Maintenance request:", maintenanceRequest);
     
     toast({
-      title: "Maintenance Request Submitted",
-      description: `Maintenance request for ${vehicle.registration_number} has been submitted successfully.`,
+      title: "Maintenance Request Submitted Successfully",
+      description: `Maintenance request for ${vehicle.registration_number} has been submitted and will be processed by the maintenance team.`,
     });
 
     // Reset form
@@ -78,19 +80,45 @@ const MaintenanceForm = ({ vehicle }: MaintenanceFormProps) => {
     setDescription("");
     setPriority("medium");
     setRequestedBy("");
+
+    // Return to vehicle detail if onCancel is provided
+    if (onCancel) {
+      onCancel();
+    }
   };
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Maintenance Request</CardTitle>
+    <Card className="border-slate-200">
+      <CardHeader className="bg-slate-50 border-b border-slate-200">
+        <div className="flex justify-between items-center">
+          <CardTitle className="flex items-center gap-3 text-slate-900">
+            <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
+              <Wrench className="w-4 h-4 text-white" />
+            </div>
+            Maintenance Request
+          </CardTitle>
+          {onCancel && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onCancel} 
+              className="h-8 w-8"
+              title="Cancel maintenance request"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
+        <p className="text-slate-600 text-sm">
+          Submit a maintenance request for this vehicle to the maintenance team
+        </p>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="maintenance-type">Maintenance Type</Label>
+            <Label htmlFor="maintenance-type" className="text-slate-700 font-medium">Maintenance Type</Label>
             <Select value={maintenanceType} onValueChange={setMaintenanceType}>
-              <SelectTrigger>
+              <SelectTrigger className="border-slate-300 focus:border-slate-500">
                 <SelectValue placeholder="Select maintenance type" />
               </SelectTrigger>
               <SelectContent>
@@ -104,9 +132,9 @@ const MaintenanceForm = ({ vehicle }: MaintenanceFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="priority">Priority Level</Label>
+            <Label htmlFor="priority" className="text-slate-700 font-medium">Priority Level</Label>
             <Select value={priority} onValueChange={(value: "low" | "medium" | "high") => setPriority(value)}>
-              <SelectTrigger>
+              <SelectTrigger className="border-slate-300 focus:border-slate-500">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -118,31 +146,47 @@ const MaintenanceForm = ({ vehicle }: MaintenanceFormProps) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="requested-by">Requested By</Label>
+            <Label htmlFor="requested-by" className="text-slate-700 font-medium">Requested By</Label>
             <Input
               id="requested-by"
               value={requestedBy}
               onChange={(e) => setRequestedBy(e.target.value)}
               placeholder="Your name or employee ID"
+              className="border-slate-300 focus:border-slate-500"
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
+            <Label htmlFor="description" className="text-slate-700 font-medium">Description</Label>
             <Textarea
               id="description"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Describe the issue or maintenance required in detail..."
               rows={5}
+              className="border-slate-300 focus:border-slate-500 resize-none"
               required
             />
           </div>
 
-          <Button type="submit" className="w-full" disabled={!maintenanceType}>
-            Submit Maintenance Request
-          </Button>
+          <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-200">
+            <Button 
+              type="submit" 
+              className="flex-1 sm:flex-none bg-slate-900 hover:bg-slate-800 text-white px-8 py-3"
+              disabled={!maintenanceType}
+            >
+              Submit Maintenance Request
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="flex-1 sm:flex-none border-slate-300 hover:bg-slate-50"
+              onClick={onCancel}
+            >
+              Cancel
+            </Button>
+          </div>
         </form>
       </CardContent>
     </Card>

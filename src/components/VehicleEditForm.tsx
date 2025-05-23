@@ -35,7 +35,7 @@ const VehicleEditForm = ({ vehicle, onSuccess }: VehicleEditFormProps) => {
     fuel_level: vehicle.fuel_level?.toString() || '',
     battery_level: vehicle.battery_level?.toString() || '',
     image_url: vehicle.image_url || '',
-    site_id: vehicle.site_id || ''
+    site_id: vehicle.site_id || 'no-site'
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -56,7 +56,7 @@ const VehicleEditForm = ({ vehicle, onSuccess }: VehicleEditFormProps) => {
         fuel_level: formData.fuel_level ? parseInt(formData.fuel_level) : null,
         battery_level: formData.battery_level ? parseInt(formData.battery_level) : null,
         image_url: formData.image_url || null,
-        site_id: formData.site_id || null
+        site_id: formData.site_id === 'no-site' ? null : formData.site_id
       };
 
       const { error } = await supabase
@@ -112,7 +112,7 @@ const VehicleEditForm = ({ vehicle, onSuccess }: VehicleEditFormProps) => {
                   <SelectValue placeholder="Select a site" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No site assignment</SelectItem>
+                  <SelectItem value="no-site">No site assignment</SelectItem>
                   {sites.map((site) => (
                     <SelectItem key={site.id} value={site.id}>
                       {site.name} {site.location ? `(${site.location})` : ''}

@@ -1,4 +1,3 @@
-
 import { Vehicle } from "@/types/vehicle";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -8,6 +7,8 @@ import InspectionForm from "./InspectionForm";
 import MaintenanceForm from "./MaintenanceForm";
 import ReadingsForm from "./ReadingsForm";
 import VehicleBooking from "./VehicleBooking";
+import VehicleEditForm from "./VehicleEditForm";
+import { useUserRole } from "@/hooks/useUserRole";
 import { ArrowLeft } from "lucide-react";
 import { useState } from "react";
 
@@ -18,6 +19,7 @@ interface VehicleDetailProps {
 
 const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
   const [activeTab, setActiveTab] = useState("overview");
+  const { isFleetAdmin } = useUserRole();
 
   const getVehicleTypeLabel = (type: string) => {
     switch (type) {
@@ -67,6 +69,11 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
       return originalUrl;
     }
     return originalUrl || `https://via.placeholder.com/600x400/e2e8f0/475569?text=${encodeURIComponent(vehicle.type.toUpperCase())}`;
+  };
+
+  const handleVehicleUpdated = () => {
+    // Refresh the page or refetch data
+    window.location.reload();
   };
 
   return (
@@ -182,11 +189,14 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
 
         <div className="xl:col-span-3">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-4 bg-slate-100 p-1">
+            <TabsList className={`grid w-full ${isFleetAdmin ? 'grid-cols-5' : 'grid-cols-4'} bg-slate-100 p-1`}>
               <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Overview</TabsTrigger>
               <TabsTrigger value="booking" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Booking</TabsTrigger>
               <TabsTrigger value="inspection" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Inspection</TabsTrigger>
               <TabsTrigger value="maintenance" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Maintenance</TabsTrigger>
+              {isFleetAdmin && (
+                <TabsTrigger value="admin" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Admin</TabsTrigger>
+              )}
             </TabsList>
             
             <TabsContent value="overview" className="space-y-6 mt-6">
@@ -244,6 +254,15 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
             <TabsContent value="maintenance" className="mt-6">
               <MaintenanceForm vehicle={vehicle} />
             </TabsContent>
+            
+            {isFleetAdmin && (
+              <TabsContent value="admin" className="mt-6">
+                <VehicleEditForm 
+                  vehicle={vehicle} 
+                  onSuccess={handleVehicleUpdated}
+                />
+              </TabsContent>
+            )}
           </Tabs>
         </div>
       </div>

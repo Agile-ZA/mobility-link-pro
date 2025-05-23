@@ -14,10 +14,19 @@ interface FleetAdminPanelProps {
 }
 
 const FleetAdminPanel = ({ onVehicleAdded, onEditVehicle }: FleetAdminPanelProps) => {
-  const { isFleetAdmin, userRole } = useUserRole();
+  const { isFleetAdmin, userRole, loading } = useUserRole();
   const [showAddForm, setShowAddForm] = useState(false);
 
+  console.log("FleetAdminPanel - Role check:", { isFleetAdmin, userRole, loading });
+
+  // Don't render anything while loading
+  if (loading) {
+    return null;
+  }
+
+  // Don't render if user is not a fleet admin
   if (!isFleetAdmin) {
+    console.log("User is not fleet admin, hiding panel");
     return null;
   }
 

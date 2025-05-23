@@ -1,10 +1,15 @@
 
 import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import VehicleList from "@/components/VehicleList";
 import VehicleDetail from "@/components/VehicleDetail";
-import { Vehicle } from "@/types/vehicle";
+import AuthPage from "@/components/AuthPage";
+import UserHeader from "@/components/UserHeader";
+import { Vehicle } from "@/hooks/useVehicles";
+import { Loader2 } from "lucide-react";
 
 const Index = () => {
+  const { user, loading } = useAuth();
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
   const handleVehicleSelect = (vehicle: Vehicle) => {
@@ -14,6 +19,21 @@ const Index = () => {
   const handleBackToList = () => {
     setSelectedVehicle(null);
   };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <Loader2 className="w-6 h-6 animate-spin text-slate-600" />
+          <span className="text-slate-600">Loading...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <AuthPage />;
+  }
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -29,12 +49,15 @@ const Index = () => {
                 <p className="text-sm text-slate-600">Enterprise Vehicle Management</p>
               </div>
             </div>
-            <div className="hidden md:flex items-center space-x-6 text-sm text-slate-600">
-              <div className="flex items-center space-x-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-                <span>System Online</span>
+            <div className="flex items-center space-x-6">
+              <div className="hidden md:flex items-center space-x-6 text-sm text-slate-600">
+                <div className="flex items-center space-x-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span>System Online</span>
+                </div>
+                <div>Supabase Connected</div>
               </div>
-              <div>SAP Integration Active</div>
+              <UserHeader />
             </div>
           </div>
         </div>

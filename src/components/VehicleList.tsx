@@ -1,110 +1,39 @@
-
-import { useState, useMemo } from "react";
-import { Vehicle } from "@/types/vehicle";
+import { useMemo } from "react";
+import { useVehicles, Vehicle } from "@/hooks/useVehicles";
+import { useAuth } from "@/hooks/useAuth";
 import VehicleCard from "./VehicleCard";
-import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-
-// Updated mock data with new status system
-const mockVehicles: Vehicle[] = [
-  {
-    id: "1",
-    registrationNumber: "FL-001-TX",
-    type: "truck",
-    make: "Ford",
-    model: "F-150",
-    year: 2022,
-    status: "available",
-    imageUrl: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13",
-    mileage: 45000,
-    location: "Main Distribution Center",
-    lastInspection: "2024-05-15",
-    nextMaintenance: "2024-06-15",
-    fuelLevel: 75
-  },
-  {
-    id: "2",
-    registrationNumber: "FK-002-TX",
-    type: "forklift",
-    make: "Toyota",
-    model: "8FGU25",
-    year: 2021,
-    status: "booked",
-    imageUrl: "https://images.unsplash.com/photo-1586936893354-362ad6ae47ba",
-    operatingHours: 2500,
-    location: "Warehouse Complex A",
-    lastInspection: "2024-05-10",
-    nextMaintenance: "2024-06-10",
-    batteryLevel: 85,
-    currentUser: {
-      name: "John Smith",
-      id: "user-001",
-      bookedAt: "2024-05-22T08:30:00Z"
-    }
-  },
-  {
-    id: "3",
-    registrationNumber: "PC-003-TX",
-    type: "car",
-    make: "Toyota",
-    model: "Camry Hybrid",
-    year: 2023,
-    status: "maintenance",
-    imageUrl: "https://images.unsplash.com/photo-1555215695-3004980ad54e",
-    mileage: 12000,
-    location: "Executive Office Complex",
-    lastInspection: "2024-05-20",
-    nextMaintenance: "2024-07-20",
-    fuelLevel: 60
-  },
-  {
-    id: "4",
-    registrationNumber: "FL-004-TX",
-    type: "truck",
-    make: "Chevrolet",
-    model: "Silverado 2500HD",
-    year: 2021,
-    status: "damaged",
-    imageUrl: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13",
-    mileage: 67000,
-    location: "North Distribution Hub",
-    lastInspection: "2024-05-18",
-    nextMaintenance: "2024-06-18",
-    fuelLevel: 40
-  }
-];
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
 
 interface VehicleListProps {
   onVehicleSelect: (vehicle: Vehicle) => void;
 }
 
 const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
-  const [vehicles, setVehicles] = useState<Vehicle[]>(mockVehicles);
+  const { vehicles, loading } = useVehicles();
+  const { user } = useAuth();
   const [selectedType, setSelectedType] = useState<string>("all");
-  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+  const [selectedStatus, setSelectedStatus] = useState<string>("available");
 
-  const handleVehicleStatusUpdate = (vehicleId: string, newStatus: Vehicle['status'], userData?: Vehicle['currentUser']) => {
-    setVehicles(prevVehicles =>
-      prevVehicles.map(vehicle =>
-        vehicle.id === vehicleId
-          ? {
-              ...vehicle,
-              status: newStatus,
-              currentUser: newStatus === 'booked' ? userData : undefined
-            }
-          : vehicle
-      )
-    );
-  };
-
+  // Filter vehicles to show available by default, or user's assigned vehicle
   const filteredVehicles = useMemo(() => {
     return vehicles.filter(vehicle => {
       const typeMatch = selectedType === "all" || vehicle.type === selectedType;
       const statusMatch = selectedStatus === "all" || vehicle.status === selectedStatus;
+      
+      // If showing "available" status, also include vehicles assigned to current user
+      if (selectedStatus === "available" && vehicle.status === "booked" && vehicle.current_user_id === user?.id) {
+        return typeMatch;
+      }
+      
       return typeMatch && statusMatch;
     });
-  }, [vehicles, selectedType, selectedStatus]);
+  }, [vehicles, selectedType, selectedStatus, user?.id]);
+
+  // Get user's assigned vehicle
+  const userVehicle = vehicles.find(v => v.current_user_id === user?.id);
 
   const stats = useMemo(() => {
     const total = vehicles.length;
@@ -115,6 +44,17 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
     return { total, available, booked, maintenance, damaged };
   }, [vehicles]);
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="flex items-center gap-3">
+          <Loader2 className="w-6 h-6 animate-spin text-slate-600" />
+          <span className="text-slate-600">Loading vehicles...</span>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div className="space-y-4">
@@ -122,6 +62,26 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
           <h2 className="text-3xl font-bold text-slate-900">Fleet Overview</h2>
           <p className="text-slate-600 mt-1">Monitor and manage your corporate vehicle fleet</p>
         </div>
+
+        {userVehicle && (
+          <Card className="border-blue-200 bg-blue-50">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-blue-800">Your Assigned Vehicle</p>
+                  <p className="text-lg font-bold text-blue-900">{userVehicle.registration_number}</p>
+                  <p className="text-sm text-blue-700">{userVehicle.make} {userVehicle.model} • {userVehicle.location}</p>
+                </div>
+                <button
+                  onClick={() => onVehicleSelect(userVehicle)}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                >
+                  Manage Vehicle
+                </button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
         
         {/* Stats Cards */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
@@ -218,8 +178,8 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border-slate-200">
+                    <SelectItem value="available">Available to Book</SelectItem>
                     <SelectItem value="all">All Statuses</SelectItem>
-                    <SelectItem value="available">Available</SelectItem>
                     <SelectItem value="booked">Booked</SelectItem>
                     <SelectItem value="maintenance">Maintenance</SelectItem>
                     <SelectItem value="damaged">Damaged</SelectItem>
@@ -241,7 +201,6 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
             key={vehicle.id}
             vehicle={vehicle}
             onSelect={() => onVehicleSelect(vehicle)}
-            onStatusUpdate={handleVehicleStatusUpdate}
           />
         ))}
       </div>

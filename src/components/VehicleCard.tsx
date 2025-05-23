@@ -1,15 +1,16 @@
-
-import { Vehicle } from "@/types/vehicle";
+import { Vehicle } from "@/hooks/useVehicles";
+import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 
 interface VehicleCardProps {
   vehicle: Vehicle;
   onSelect: () => void;
-  onStatusUpdate: (vehicleId: string, newStatus: Vehicle['status'], userData?: Vehicle['currentUser']) => void;
 }
 
 const VehicleCard = ({ vehicle, onSelect }: VehicleCardProps) => {
+  const { user } = useAuth();
+  
   const getVehicleTypeIcon = (type: string) => {
     switch (type) {
       case 'truck':
@@ -94,14 +95,18 @@ const VehicleCard = ({ vehicle, onSelect }: VehicleCardProps) => {
     return `https://via.placeholder.com/400x240/e2e8f0/475569?text=${encodeURIComponent(vehicle.type.toUpperCase())}`;
   };
 
+  const isUserVehicle = vehicle.current_user_id === user?.id;
+
   return (
     <Card 
-      className="cursor-pointer transition-all duration-200 hover:shadow-xl hover:shadow-slate-200/50 border-slate-200 bg-white overflow-hidden group"
+      className={`cursor-pointer transition-all duration-200 hover:shadow-xl hover:shadow-slate-200/50 border-slate-200 bg-white overflow-hidden group ${
+        isUserVehicle ? 'ring-2 ring-blue-500 border-blue-200' : ''
+      }`}
       onClick={onSelect}
     >
       <div className="aspect-[5/3] relative overflow-hidden bg-slate-100">
         <img
-          src={getImageUrl(vehicle.imageUrl)}
+          src={vehicle.image_url || `https://via.placeholder.com/400x240/e2e8f0/475569?text=${encodeURIComponent(vehicle.type.toUpperCase())}`}
           alt={`${vehicle.make} ${vehicle.model}`}
           className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
           onError={(e) => {
@@ -111,12 +116,18 @@ const VehicleCard = ({ vehicle, onSelect }: VehicleCardProps) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
         <div className="absolute top-3 right-3">
           <Badge 
-            variant={getStatusBadgeVariant(vehicle.status)}
             className={getStatusBadgeClass(vehicle.status)}
           >
             {getStatusLabel(vehicle.status)}
           </Badge>
         </div>
+        {isUserVehicle && (
+          <div className="absolute top-3 left-3">
+            <Badge className="bg-blue-600 text-white">
+              Your Vehicle
+            </Badge>
+          </div>
+        )}
         <div className="absolute bottom-3 left-3">
           <div className="bg-white/95 backdrop-blur-sm rounded-md px-3 py-1.5 text-sm font-medium text-slate-800 shadow-sm">
             {getVehicleTypeIcon(vehicle.type)} {getVehicleTypeLabel(vehicle.type)}
@@ -129,7 +140,7 @@ const VehicleCard = ({ vehicle, onSelect }: VehicleCardProps) => {
           <div className="flex justify-between items-start">
             <div>
               <h3 className="font-semibold text-lg text-slate-900 leading-tight">
-                {vehicle.registrationNumber}
+                {vehicle.registration_number}
               </h3>
               <p className="text-slate-600 text-sm mt-1">
                 {vehicle.make} {vehicle.model} • {vehicle.year}
@@ -137,14 +148,16 @@ const VehicleCard = ({ vehicle, onSelect }: VehicleCardProps) => {
             </div>
           </div>
 
-          {vehicle.status === 'booked' && vehicle.currentUser && (
+          {vehicle.status === 'booked' && vehicle.profile && (
             <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
               <p className="text-blue-900 text-sm font-medium">
-                👤 {vehicle.currentUser.name}
+                👤 {vehicle.profile.full_name}
               </p>
-              <p className="text-blue-700 text-xs mt-1">
-                Booked: {new Date(vehicle.currentUser.bookedAt).toLocaleDateString()}
-              </p>
+              {vehicle.booked_at && (
+                <p className="text-blue-700 text-xs mt-1">
+                  Booked: {new Date(vehicle.booked_at).toLocaleDateString()}
+                </p>
+              )}
             </div>
           )}
           
@@ -159,17 +172,17 @@ const VehicleCard = ({ vehicle, onSelect }: VehicleCardProps) => {
                 <span>{vehicle.mileage.toLocaleString()} mi</span>
               </div>
             )}
-            {vehicle.operatingHours && (
+            {vehicle.operating_hours && (
               <div className="flex items-center space-x-2 sm:col-span-2">
                 <span className="text-slate-400">⏰</span>
-                <span>{vehicle.operatingHours.toLocaleString()} operating hours</span>
+                <span>{vehicle.operating_hours.toLocaleString()} operating hours</span>
               </div>
             )}
           </div>
           
-          {(vehicle.fuelLevel || vehicle.batteryLevel) && (
+          {(vehicle.fuel_level || vehicle.battery_level) && (
             <div className="pt-3 border-t border-slate-100 space-y-2">
-              {vehicle.fuelLevel && (
+              {vehicle.fuel_level && (
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center space-x-2">
                     <span className="text-slate-400">⛽</span>
@@ -179,14 +192,14 @@ const VehicleCard = ({ vehicle, onSelect }: VehicleCardProps) => {
                     <div className="w-16 sm:w-20 bg-slate-200 rounded-full h-2">
                       <div 
                         className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
-                        style={{ width: `${vehicle.fuelLevel}%` }}
+                        style={{ width: `${vehicle.fuel_level}%` }}
                       />
                     </div>
-                    <span className="text-slate-700 font-medium w-10">{vehicle.fuelLevel}%</span>
+                    <span className="text-slate-700 font-medium w-10">{vehicle.fuel_level}%</span>
                   </div>
                 </div>
               )}
-              {vehicle.batteryLevel && (
+              {vehicle.battery_level && (
                 <div className="flex items-center justify-between text-sm">
                   <div className="flex items-center space-x-2">
                     <span className="text-slate-400">🔋</span>
@@ -196,10 +209,10 @@ const VehicleCard = ({ vehicle, onSelect }: VehicleCardProps) => {
                     <div className="w-16 sm:w-20 bg-slate-200 rounded-full h-2">
                       <div 
                         className="bg-green-600 h-2 rounded-full transition-all duration-300" 
-                        style={{ width: `${vehicle.batteryLevel}%` }}
+                        style={{ width: `${vehicle.battery_level}%` }}
                       />
                     </div>
-                    <span className="text-slate-700 font-medium w-10">{vehicle.batteryLevel}%</span>
+                    <span className="text-slate-700 font-medium w-10">{vehicle.battery_level}%</span>
                   </div>
                 </div>
               )}

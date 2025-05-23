@@ -9,7 +9,113 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          department: string | null
+          email: string
+          employee_id: string | null
+          full_name: string | null
+          id: string
+          phone: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          department?: string | null
+          email: string
+          employee_id?: string | null
+          full_name?: string | null
+          id: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          department?: string | null
+          email?: string
+          employee_id?: string | null
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      vehicles: {
+        Row: {
+          battery_level: number | null
+          booked_at: string | null
+          created_at: string
+          current_user_id: string | null
+          fuel_level: number | null
+          id: string
+          image_url: string | null
+          last_inspection: string
+          location: string
+          make: string
+          mileage: number | null
+          model: string
+          next_maintenance: string
+          operating_hours: number | null
+          registration_number: string
+          status: string
+          type: string
+          updated_at: string
+          year: number
+        }
+        Insert: {
+          battery_level?: number | null
+          booked_at?: string | null
+          created_at?: string
+          current_user_id?: string | null
+          fuel_level?: number | null
+          id?: string
+          image_url?: string | null
+          last_inspection: string
+          location: string
+          make: string
+          mileage?: number | null
+          model: string
+          next_maintenance: string
+          operating_hours?: number | null
+          registration_number: string
+          status: string
+          type: string
+          updated_at?: string
+          year: number
+        }
+        Update: {
+          battery_level?: number | null
+          booked_at?: string | null
+          created_at?: string
+          current_user_id?: string | null
+          fuel_level?: number | null
+          id?: string
+          image_url?: string | null
+          last_inspection?: string
+          location?: string
+          make?: string
+          mileage?: number | null
+          model?: string
+          next_maintenance?: string
+          operating_hours?: number | null
+          registration_number?: string
+          status?: string
+          type?: string
+          updated_at?: string
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "vehicles_current_user_id_fkey"
+            columns: ["current_user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

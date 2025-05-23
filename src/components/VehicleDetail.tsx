@@ -1,6 +1,4 @@
-
-import { useState } from "react";
-import { Vehicle } from "@/types/vehicle";
+import { Vehicle } from "@/hooks/useVehicles";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +8,7 @@ import MaintenanceForm from "./MaintenanceForm";
 import ReadingsForm from "./ReadingsForm";
 import VehicleBooking from "./VehicleBooking";
 import { ArrowLeft } from "lucide-react";
+import { useState } from "react";
 
 interface VehicleDetailProps {
   vehicle: Vehicle;
@@ -18,15 +17,6 @@ interface VehicleDetailProps {
 
 const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
   const [activeTab, setActiveTab] = useState("overview");
-  const [currentVehicle, setCurrentVehicle] = useState<Vehicle>(vehicle);
-
-  const handleStatusUpdate = (vehicleId: string, newStatus: Vehicle['status'], userData?: Vehicle['currentUser']) => {
-    setCurrentVehicle(prev => ({
-      ...prev,
-      status: newStatus,
-      currentUser: newStatus === 'booked' ? userData : undefined
-    }));
-  };
 
   const getVehicleTypeLabel = (type: string) => {
     switch (type) {
@@ -72,13 +62,10 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
   };
 
   const getImageUrl = (originalUrl: string) => {
-    if (originalUrl.includes('unsplash.com')) {
-      const imageId = originalUrl.split('photo-')[1]?.split('?')[0];
-      if (imageId) {
-        return `https://images.unsplash.com/photo-${imageId}?w=600&h=400&fit=crop&auto=format`;
-      }
+    if (originalUrl && originalUrl.includes('unsplash.com')) {
+      return originalUrl;
     }
-    return `https://via.placeholder.com/600x400/e2e8f0/475569?text=${encodeURIComponent(currentVehicle.type.toUpperCase())}`;
+    return originalUrl || `https://via.placeholder.com/600x400/e2e8f0/475569?text=${encodeURIComponent(vehicle.type.toUpperCase())}`;
   };
 
   return (
@@ -95,14 +82,14 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
         <div className="flex-1">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">{currentVehicle.registrationNumber}</h1>
-              <p className="text-slate-600 text-lg">{currentVehicle.make} {currentVehicle.model} • {currentVehicle.year}</p>
-              <p className="text-slate-500 text-sm">{getVehicleTypeLabel(currentVehicle.type)}</p>
+              <h1 className="text-3xl font-bold text-slate-900">{vehicle.registration_number}</h1>
+              <p className="text-slate-600 text-lg">{vehicle.make} {vehicle.model} • {vehicle.year}</p>
+              <p className="text-slate-500 text-sm">{getVehicleTypeLabel(vehicle.type)}</p>
             </div>
             <Badge 
-              className={`text-base px-4 py-2 ${getStatusBadgeClass(currentVehicle.status)}`}
+              className={`text-base px-4 py-2 ${getStatusBadgeClass(vehicle.status)}`}
             >
-              {getStatusLabel(currentVehicle.status)}
+              {getStatusLabel(vehicle.status)}
             </Badge>
           </div>
         </div>
@@ -114,7 +101,7 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
             <CardContent className="p-0">
               <div className="aspect-[4/3] relative overflow-hidden">
                 <img
-                  src={getImageUrl(vehicle.imageUrl)}
+                  src={getImageUrl(vehicle.image_url)}
                   alt={`${vehicle.make} ${vehicle.model}`}
                   className="w-full h-full object-cover"
                   onError={(e) => {
@@ -138,49 +125,49 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
                       <span className="text-slate-900">{vehicle.mileage.toLocaleString()} mi</span>
                     </div>
                   )}
-                  {vehicle.operatingHours && (
+                  {vehicle.operating_hours && (
                     <div className="flex justify-between items-center py-2 border-b border-slate-100">
                       <span className="text-slate-600 font-medium">Operating Hours</span>
-                      <span className="text-slate-900">{vehicle.operatingHours.toLocaleString()} hrs</span>
+                      <span className="text-slate-900">{vehicle.operating_hours.toLocaleString()} hrs</span>
                     </div>
                   )}
                   <div className="flex justify-between items-center py-2 border-b border-slate-100">
                     <span className="text-slate-600 font-medium">Last Inspection</span>
-                    <span className="text-slate-900">{new Date(vehicle.lastInspection).toLocaleDateString()}</span>
+                    <span className="text-slate-900">{new Date(vehicle.last_inspection).toLocaleDateString()}</span>
                   </div>
                   <div className="flex justify-between items-center py-2">
                     <span className="text-slate-600 font-medium">Next Maintenance</span>
-                    <span className="text-slate-900">{new Date(vehicle.nextMaintenance).toLocaleDateString()}</span>
+                    <span className="text-slate-900">{new Date(vehicle.next_maintenance).toLocaleDateString()}</span>
                   </div>
                 </div>
 
-                {(vehicle.fuelLevel || vehicle.batteryLevel) && (
+                {(vehicle.fuel_level || vehicle.battery_level) && (
                   <div className="space-y-4 pt-4 border-t border-slate-200">
                     <h4 className="font-medium text-slate-900">System Status</h4>
-                    {vehicle.fuelLevel && (
+                    {vehicle.fuel_level && (
                       <div>
                         <div className="flex justify-between text-sm mb-2">
                           <span className="text-slate-600">Fuel Level</span>
-                          <span className="text-slate-900 font-medium">{vehicle.fuelLevel}%</span>
+                          <span className="text-slate-900 font-medium">{vehicle.fuel_level}%</span>
                         </div>
                         <div className="bg-slate-200 rounded-full h-3">
                           <div 
                             className="bg-blue-600 h-3 rounded-full transition-all duration-300" 
-                            style={{ width: `${vehicle.fuelLevel}%` }}
+                            style={{ width: `${vehicle.fuel_level}%` }}
                           />
                         </div>
                       </div>
                     )}
-                    {vehicle.batteryLevel && (
+                    {vehicle.battery_level && (
                       <div>
                         <div className="flex justify-between text-sm mb-2">
                           <span className="text-slate-600">Battery Level</span>
-                          <span className="text-slate-900 font-medium">{vehicle.batteryLevel}%</span>
+                          <span className="text-slate-900 font-medium">{vehicle.battery_level}%</span>
                         </div>
                         <div className="bg-slate-200 rounded-full h-3">
                           <div 
                             className="bg-green-600 h-3 rounded-full transition-all duration-300" 
-                            style={{ width: `${vehicle.batteryLevel}%` }}
+                            style={{ width: `${vehicle.battery_level}%` }}
                           />
                         </div>
                       </div>
@@ -246,15 +233,15 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
             </TabsContent>
 
             <TabsContent value="booking" className="mt-6">
-              <VehicleBooking vehicle={currentVehicle} onStatusUpdate={handleStatusUpdate} />
+              <VehicleBooking vehicle={vehicle} />
             </TabsContent>
             
             <TabsContent value="inspection" className="mt-6">
-              <InspectionForm vehicle={currentVehicle} />
+              <InspectionForm vehicle={vehicle} />
             </TabsContent>
             
             <TabsContent value="maintenance" className="mt-6">
-              <MaintenanceForm vehicle={currentVehicle} />
+              <MaintenanceForm vehicle={vehicle} />
             </TabsContent>
           </Tabs>
         </div>

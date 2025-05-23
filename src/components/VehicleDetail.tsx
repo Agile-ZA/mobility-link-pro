@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import InspectionForm from "./InspectionForm";
 import MaintenanceForm from "./MaintenanceForm";
 import ReadingsForm from "./ReadingsForm";
+import { ArrowLeft } from "lucide-react";
 
 interface VehicleDetailProps {
   vehicle: Vehicle;
@@ -20,87 +21,112 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
   const getVehicleTypeLabel = (type: string) => {
     switch (type) {
       case 'truck':
-        return 'Truck';
+        return 'Commercial Truck';
       case 'forklift':
-        return 'Forklift';
+        return 'Industrial Forklift';
       case 'car':
-        return 'Car';
+        return 'Executive Vehicle';
       default:
-        return 'Vehicle';
+        return 'Fleet Vehicle';
     }
+  };
+
+  const getImageUrl = (originalUrl: string) => {
+    if (originalUrl.includes('unsplash.com')) {
+      const imageId = originalUrl.split('photo-')[1]?.split('?')[0];
+      if (imageId) {
+        return `https://images.unsplash.com/photo-${imageId}?w=600&h=400&fit=crop&auto=format`;
+      }
+    }
+    return `https://via.placeholder.com/600x400/e2e8f0/475569?text=${encodeURIComponent(vehicle.type.toUpperCase())}`;
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button variant="outline" onClick={onBack}>
-          ← Back to Fleet
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+        <Button 
+          variant="outline" 
+          onClick={onBack}
+          className="border-slate-300 hover:bg-slate-50 flex items-center gap-2"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Fleet
         </Button>
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">{vehicle.registrationNumber}</h1>
-          <p className="text-gray-600">{vehicle.make} {vehicle.model} ({vehicle.year})</p>
+        <div className="flex-1">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <h1 className="text-3xl font-bold text-slate-900">{vehicle.registrationNumber}</h1>
+              <p className="text-slate-600 text-lg">{vehicle.make} {vehicle.model} • {vehicle.year}</p>
+              <p className="text-slate-500 text-sm">{getVehicleTypeLabel(vehicle.type)}</p>
+            </div>
+            <Badge 
+              variant={vehicle.isAvailable ? "default" : "destructive"}
+              className={`text-base px-4 py-2 ${vehicle.isAvailable ? "bg-green-600 hover:bg-green-700" : ""}`}
+            >
+              {vehicle.isAvailable ? "Available for Use" : "Currently In Use"}
+            </Badge>
+          </div>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-1">
-          <Card>
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+        <div className="xl:col-span-1">
+          <Card className="border-slate-200">
             <CardContent className="p-0">
-              <img
-                src={vehicle.imageUrl}
-                alt={`${vehicle.make} ${vehicle.model}`}
-                className="w-full h-64 object-cover rounded-t-lg"
-              />
-              <div className="p-4 space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="font-medium">Status</span>
-                  <Badge variant={vehicle.isAvailable ? "default" : "destructive"}>
-                    {vehicle.isAvailable ? "Available" : "In Use"}
-                  </Badge>
-                </div>
-                
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Type</span>
-                    <span>{getVehicleTypeLabel(vehicle.type)}</span>
+              <div className="aspect-[4/3] relative overflow-hidden">
+                <img
+                  src={getImageUrl(vehicle.imageUrl)}
+                  alt={`${vehicle.make} ${vehicle.model}`}
+                  className="w-full h-full object-cover"
+                  onError={(e) => {
+                    e.currentTarget.src = `https://via.placeholder.com/600x400/e2e8f0/475569?text=${encodeURIComponent(vehicle.type.toUpperCase())}`;
+                  }}
+                />
+              </div>
+              <div className="p-6 space-y-4">
+                <div className="grid grid-cols-1 gap-3 text-sm">
+                  <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                    <span className="text-slate-600 font-medium">Vehicle Type</span>
+                    <span className="text-slate-900">{getVehicleTypeLabel(vehicle.type)}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Location</span>
-                    <span>{vehicle.location}</span>
+                  <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                    <span className="text-slate-600 font-medium">Current Location</span>
+                    <span className="text-slate-900 text-right">{vehicle.location}</span>
                   </div>
                   {vehicle.mileage && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Mileage</span>
-                      <span>{vehicle.mileage.toLocaleString()} mi</span>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                      <span className="text-slate-600 font-medium">Total Mileage</span>
+                      <span className="text-slate-900">{vehicle.mileage.toLocaleString()} mi</span>
                     </div>
                   )}
                   {vehicle.operatingHours && (
-                    <div className="flex justify-between">
-                      <span className="text-gray-500">Operating Hours</span>
-                      <span>{vehicle.operatingHours.toLocaleString()} hrs</span>
+                    <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                      <span className="text-slate-600 font-medium">Operating Hours</span>
+                      <span className="text-slate-900">{vehicle.operatingHours.toLocaleString()} hrs</span>
                     </div>
                   )}
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Last Inspection</span>
-                    <span>{new Date(vehicle.lastInspection).toLocaleDateString()}</span>
+                  <div className="flex justify-between items-center py-2 border-b border-slate-100">
+                    <span className="text-slate-600 font-medium">Last Inspection</span>
+                    <span className="text-slate-900">{new Date(vehicle.lastInspection).toLocaleDateString()}</span>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-500">Next Maintenance</span>
-                    <span>{new Date(vehicle.nextMaintenance).toLocaleDateString()}</span>
+                  <div className="flex justify-between items-center py-2">
+                    <span className="text-slate-600 font-medium">Next Maintenance</span>
+                    <span className="text-slate-900">{new Date(vehicle.nextMaintenance).toLocaleDateString()}</span>
                   </div>
                 </div>
 
                 {(vehicle.fuelLevel || vehicle.batteryLevel) && (
-                  <div className="space-y-3 pt-2 border-t">
+                  <div className="space-y-4 pt-4 border-t border-slate-200">
+                    <h4 className="font-medium text-slate-900">System Status</h4>
                     {vehicle.fuelLevel && (
                       <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Fuel Level</span>
-                          <span>{vehicle.fuelLevel}%</span>
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="text-slate-600">Fuel Level</span>
+                          <span className="text-slate-900 font-medium">{vehicle.fuelLevel}%</span>
                         </div>
-                        <div className="bg-gray-200 rounded-full h-2">
+                        <div className="bg-slate-200 rounded-full h-3">
                           <div 
-                            className="bg-blue-500 h-2 rounded-full" 
+                            className="bg-blue-600 h-3 rounded-full transition-all duration-300" 
                             style={{ width: `${vehicle.fuelLevel}%` }}
                           />
                         </div>
@@ -108,13 +134,13 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
                     )}
                     {vehicle.batteryLevel && (
                       <div>
-                        <div className="flex justify-between text-sm mb-1">
-                          <span>Battery Level</span>
-                          <span>{vehicle.batteryLevel}%</span>
+                        <div className="flex justify-between text-sm mb-2">
+                          <span className="text-slate-600">Battery Level</span>
+                          <span className="text-slate-900 font-medium">{vehicle.batteryLevel}%</span>
                         </div>
-                        <div className="bg-gray-200 rounded-full h-2">
+                        <div className="bg-slate-200 rounded-full h-3">
                           <div 
-                            className="bg-green-500 h-2 rounded-full" 
+                            className="bg-green-600 h-3 rounded-full transition-all duration-300" 
                             style={{ width: `${vehicle.batteryLevel}%` }}
                           />
                         </div>
@@ -127,47 +153,55 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
           </Card>
         </div>
 
-        <div className="lg:col-span-2">
+        <div className="xl:col-span-3">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="inspection">Inspection</TabsTrigger>
-              <TabsTrigger value="maintenance">Maintenance</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-3 bg-slate-100 p-1">
+              <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Overview</TabsTrigger>
+              <TabsTrigger value="inspection" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Inspection</TabsTrigger>
+              <TabsTrigger value="maintenance" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Maintenance</TabsTrigger>
             </TabsList>
             
-            <TabsContent value="overview" className="space-y-6">
-              <Card>
+            <TabsContent value="overview" className="space-y-6 mt-6">
+              <Card className="border-slate-200">
                 <CardHeader>
-                  <CardTitle>Vehicle Actions</CardTitle>
+                  <CardTitle className="text-slate-900">Vehicle Operations</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Button 
                       onClick={() => setActiveTab("inspection")}
-                      className="h-20 flex flex-col items-center justify-center space-y-2"
+                      className="h-24 flex flex-col items-center justify-center space-y-3 bg-slate-900 hover:bg-slate-800"
                     >
-                      <span className="text-2xl">📋</span>
-                      <span>Inspect Vehicle</span>
+                      <span className="text-3xl">📋</span>
+                      <div className="text-center">
+                        <div className="font-semibold">Vehicle Inspection</div>
+                        <div className="text-xs opacity-90">Capture condition & location</div>
+                      </div>
                     </Button>
                     <Button 
                       variant="outline"
                       onClick={() => setActiveTab("maintenance")}
-                      className="h-20 flex flex-col items-center justify-center space-y-2"
+                      className="h-24 flex flex-col items-center justify-center space-y-3 border-slate-300 hover:bg-slate-50"
                     >
-                      <span className="text-2xl">🔧</span>
-                      <span>Maintenance Request</span>
+                      <span className="text-3xl">🔧</span>
+                      <div className="text-center">
+                        <div className="font-semibold">Maintenance Request</div>
+                        <div className="text-xs text-slate-600">Schedule service</div>
+                      </div>
                     </Button>
-                    <ReadingsForm vehicle={vehicle} />
+                    <div className="h-24">
+                      <ReadingsForm vehicle={vehicle} />
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
             
-            <TabsContent value="inspection">
+            <TabsContent value="inspection" className="mt-6">
               <InspectionForm vehicle={vehicle} />
             </TabsContent>
             
-            <TabsContent value="maintenance">
+            <TabsContent value="maintenance" className="mt-6">
               <MaintenanceForm vehicle={vehicle} />
             </TabsContent>
           </Tabs>

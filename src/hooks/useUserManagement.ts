@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { UserRole } from "@/hooks/useUserRole";
+import { Site } from "@/types/site";
 
 export interface User {
   id: string;
@@ -14,11 +15,30 @@ export interface User {
 
 export interface UserWithRole extends User {
   role: UserRole | null;
+  site_id: string | null;
+  site_name?: string | null;
 }
 
 export const useUserManagement = () => {
   const [loading, setLoading] = useState(false);
   const queryClient = useQueryClient();
+
+  const { data: sites = [], isLoading: isLoadingSites } = useQuery({
+    queryKey: ["sites"],
+    queryFn: async () => {
+      try {
+        const { data, error } = await supabase
+          .from("sites")
+          .select("id, name, location");
+          
+        if (error) throw error;
+        return data as Site[];
+      } catch (error) {
+        console.error("Error fetching sites:", error);
+        return [];
+      }
+    }
+  });
 
   const { data: users = [], isLoading: isLoadingUsers } = useQuery({
     queryKey: ["admin-users"],
@@ -27,7 +47,7 @@ export const useUserManagement = () => {
         // First get all profiles
         const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
-          .select("id, email, full_name");
+          .select("id, email, full_name, site_id");
 
         if (profilesError) {
           throw profilesError;
@@ -41,15 +61,28 @@ export const useUserManagement = () => {
         if (rolesError) {
           throw rolesError;
         }
+        
+        // Get sites
+        const { data: siteData, error: sitesError } = await supabase
+          .from("sites")
+          .select("id, name");
+        
+        if (sitesError) {
+          throw sitesError;
+        }
 
         // Map user roles to profiles
         const usersWithRoles: UserWithRole[] = profiles.map(profile => {
           const userRole = userRoles.find(role => role.user_id === profile.id);
+          const userSite = siteData.find(site => site.id === profile.site_id);
+          
           return {
             id: profile.id,
             email: profile.email,
             full_name: profile.full_name,
-            role: userRole?.role as UserRole || null
+            role: userRole?.role as UserRole || null,
+            site_id: profile.site_id,
+            site_name: userSite?.name || null
           };
         });
         
@@ -137,6 +170,33 @@ export const useUserManagement = () => {
       toast.error("Failed to remove user role");
     }
   });
+  
+  const updateUserSiteMutation = useMutation({
+    mutationFn: async ({ userId, siteId }: { userId: string; siteId: string | null }) => {
+      setLoading(true);
+      try {
+        const { error } = await supabase
+          .from("profiles")
+          .update({ site_id: siteId })
+          .eq("id", userId);
+
+        if (error) throw error;
+        return { success: true };
+      } catch (error) {
+        console.error("Error updating user site:", error);
+        throw new Error("Failed to update user site");
+      } finally {
+        setLoading(false);
+      }
+    },
+    onSuccess: () => {
+      toast.success("User site updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["admin-users"] });
+    },
+    onError: () => {
+      toast.error("Failed to update user site");
+    }
+  });
 
   const assignRole = (userId: string, role: UserRole) => {
     assignRoleMutation.mutate({ userId, role });
@@ -145,11 +205,17 @@ export const useUserManagement = () => {
   const removeRole = (userId: string) => {
     removeRoleMutation.mutate(userId);
   };
+  
+  const updateUserSite = (userId: string, siteId: string | null) => {
+    updateUserSiteMutation.mutate({ userId, siteId });
+  };
 
   return {
     users,
-    loading: isLoadingUsers || loading,
+    sites,
+    loading: isLoadingUsers || isLoadingSites || loading,
     assignRole,
-    removeRole
+    removeRole,
+    updateUserSite
   };
 };

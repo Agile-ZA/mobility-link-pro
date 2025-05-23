@@ -21,7 +21,7 @@ interface UserRoleManagementProps {
 }
 
 const UserRoleManagement = ({ isOpen }: UserRoleManagementProps) => {
-  const { users, loading, assignRole, removeRole } = useUserManagement();
+  const { users, sites, loading, assignRole, removeRole, updateUserSite } = useUserManagement();
   const { userRole } = useUserRole();
   
   if (!isOpen) return null;
@@ -48,6 +48,10 @@ const UserRoleManagement = ({ isOpen }: UserRoleManagementProps) => {
       assignRole(userId, value as UserRole);
     }
   };
+  
+  const handleSiteChange = (userId: string, value: string | null) => {
+    updateUserSite(userId, value);
+  };
 
   // Fleet admins cannot assign admin roles
   const canAssignRole = (role: UserRole) => {
@@ -64,7 +68,7 @@ const UserRoleManagement = ({ isOpen }: UserRoleManagementProps) => {
           User Role Management
         </CardTitle>
         <p className="text-slate-600 text-sm">
-          Manage user roles and permissions
+          Manage user roles, permissions, and site assignments
         </p>
       </CardHeader>
       <CardContent>
@@ -77,7 +81,7 @@ const UserRoleManagement = ({ isOpen }: UserRoleManagementProps) => {
             No users found in the system.
           </div>
         ) : (
-          <div className="rounded-md border">
+          <div className="rounded-md border overflow-x-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -85,6 +89,7 @@ const UserRoleManagement = ({ isOpen }: UserRoleManagementProps) => {
                   <TableHead>Email</TableHead>
                   <TableHead>Current Role</TableHead>
                   <TableHead>Assign Role</TableHead>
+                  <TableHead>Site Assignment</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -115,6 +120,30 @@ const UserRoleManagement = ({ isOpen }: UserRoleManagementProps) => {
                           )}
                         </SelectContent>
                       </Select>
+                    </TableCell>
+                    <TableCell>
+                      <Select
+                        value={user.site_id || "none"}
+                        onValueChange={(value) => handleSiteChange(
+                          user.id, 
+                          value === "none" ? null : value
+                        )}
+                      >
+                        <SelectTrigger className="w-[180px]">
+                          <SelectValue placeholder="Select a site" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No Site</SelectItem>
+                          {sites.map((site) => (
+                            <SelectItem key={site.id} value={site.id}>
+                              {site.name} {site.location ? `(${site.location})` : ''}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {user.site_name && (
+                        <p className="text-xs text-slate-500 mt-1">Current: {user.site_name}</p>
+                      )}
                     </TableCell>
                   </TableRow>
                 ))}

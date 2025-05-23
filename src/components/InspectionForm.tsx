@@ -7,13 +7,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { Camera, MapPin, FileText } from "lucide-react";
+import { Camera, MapPin, FileText, X } from "lucide-react";
 
 interface InspectionFormProps {
   vehicle: Vehicle;
+  onCancel?: () => void;
 }
 
-const InspectionForm = ({ vehicle }: InspectionFormProps) => {
+const InspectionForm = ({ vehicle, onCancel }: InspectionFormProps) => {
   const [comments, setComments] = useState("");
   const [location, setLocation] = useState(vehicle.location);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -50,17 +51,35 @@ const InspectionForm = ({ vehicle }: InspectionFormProps) => {
     setImageFile(null);
     const fileInput = document.getElementById("inspection-image") as HTMLInputElement;
     if (fileInput) fileInput.value = "";
+    
+    // Return to vehicle detail if onCancel is provided
+    if (onCancel) {
+      onCancel();
+    }
   };
 
   return (
     <Card className="border-slate-200">
       <CardHeader className="bg-slate-50 border-b border-slate-200">
-        <CardTitle className="flex items-center gap-3 text-slate-900">
-          <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
-            <FileText className="w-4 h-4 text-white" />
-          </div>
-          Vehicle Inspection Report
-        </CardTitle>
+        <div className="flex justify-between items-center">
+          <CardTitle className="flex items-center gap-3 text-slate-900">
+            <div className="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center">
+              <FileText className="w-4 h-4 text-white" />
+            </div>
+            Vehicle Inspection Report
+          </CardTitle>
+          {onCancel && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onCancel} 
+              className="h-8 w-8"
+              title="Cancel inspection"
+            >
+              <X className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
         <p className="text-slate-600 text-sm">
           Document vehicle condition, capture photos, and record current location
         </p>
@@ -133,6 +152,14 @@ const InspectionForm = ({ vehicle }: InspectionFormProps) => {
               className="flex-1 sm:flex-none bg-slate-900 hover:bg-slate-800 text-white px-8 py-3"
             >
               Submit Inspection Report
+            </Button>
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="flex-1 sm:flex-none border-slate-300 hover:bg-slate-50"
+              onClick={onCancel}
+            >
+              Cancel
             </Button>
             <Button 
               type="button" 

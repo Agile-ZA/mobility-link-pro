@@ -45,7 +45,7 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
     return (
       <div className="space-y-4">
         <VehicleHeader vehicle={vehicle} onBack={handleInspectionBack} />
-        <InspectionForm vehicle={vehicle} />
+        <InspectionForm vehicle={vehicle} onCancel={handleInspectionBack} />
       </div>
     );
   }

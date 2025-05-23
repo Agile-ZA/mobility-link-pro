@@ -73,7 +73,7 @@ const InspectionForm = ({ vehicle, onCancel }: InspectionFormProps) => {
               variant="ghost" 
               size="icon" 
               onClick={onCancel} 
-              className="h-8 w-8"
+              className="h-8 w-8 hover:bg-red-100 hover:text-red-600"
               title="Cancel inspection"
             >
               <X className="h-4 w-4" />
@@ -155,8 +155,8 @@ const InspectionForm = ({ vehicle, onCancel }: InspectionFormProps) => {
             </Button>
             <Button 
               type="button" 
-              variant="outline" 
-              className="flex-1 sm:flex-none border-slate-300 hover:bg-slate-50"
+              variant="destructive" 
+              className="flex-1 sm:flex-none bg-red-600 hover:bg-red-700 text-white px-8 py-3"
               onClick={onCancel}
             >
               Cancel

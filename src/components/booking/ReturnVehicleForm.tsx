@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Camera } from "lucide-react";
+import { Camera, Car } from "lucide-react";
 
 interface ReturnVehicleFormProps {
   vehicle: Vehicle;
@@ -147,9 +147,10 @@ const ReturnVehicleForm = ({ vehicle, onVehicleUpdate, onCancel }: ReturnVehicle
       <div className="flex flex-col sm:flex-row gap-3">
         <Button 
           onClick={handleReturnVehicle}
-          className="flex-1 bg-slate-900 hover:bg-slate-800"
+          className="flex-1 bg-green-600 hover:bg-green-700 flex items-center gap-2"
           disabled={isLoading}
         >
+          <Car className="w-4 h-4" />
           {isLoading ? 'Returning...' : 'Confirm Return'}
         </Button>
         <Button 

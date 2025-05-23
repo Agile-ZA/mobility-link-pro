@@ -1,5 +1,5 @@
 
-import { Calendar, User } from "lucide-react";
+import { Calendar, User, Car } from "lucide-react";
 import { Vehicle } from "@/types/vehicle";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -33,9 +33,9 @@ const CurrentBookingInfo = ({ vehicle, isUserVehicle, onVehicleUpdate }: Current
         {!showReturnForm ? (
           <Button 
             onClick={() => setShowReturnForm(true)}
-            variant="outline"
-            className="w-full border-slate-300 hover:bg-slate-50"
+            className="w-full bg-green-600 hover:bg-green-700 flex items-center gap-2"
           >
+            <Car className="w-4 h-4" />
             Return Vehicle
           </Button>
         ) : (

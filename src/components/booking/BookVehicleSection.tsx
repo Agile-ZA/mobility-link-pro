@@ -4,6 +4,7 @@ import { Vehicle } from "@/types/vehicle";
 import { useVehicles } from "@/hooks/useVehicles";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { Car } from "lucide-react";
 
 interface BookVehicleSectionProps {
   vehicle: Vehicle;
@@ -48,9 +49,10 @@ const BookVehicleSection = ({ vehicle, userId, onVehicleUpdate }: BookVehicleSec
       </p>
       <Button 
         onClick={handleBookVehicle}
-        className="w-full bg-slate-900 hover:bg-slate-800"
+        className="w-full bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
         disabled={isLoading}
       >
+        <Car className="w-4 h-4" />
         {isLoading ? 'Booking...' : 'Book Vehicle'}
       </Button>
     </div>

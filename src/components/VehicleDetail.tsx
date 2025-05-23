@@ -54,7 +54,7 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
             </TabsList>
             
             <TabsContent value="overview" className="space-y-6 mt-6">
-              <VehicleOverviewTab isFleetAdmin={isFleetAdmin} setActiveTab={setActiveTab} />
+              <VehicleOverviewTab isFleetAdmin={isFleetAdmin} setActiveTab={setActiveTab} vehicleStatus={vehicle.status} />
             </TabsContent>
 
             <TabsContent value="booking" className="mt-6">

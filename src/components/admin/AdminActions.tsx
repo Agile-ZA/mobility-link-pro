@@ -1,10 +1,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Plus, BarChart3 } from "lucide-react";
+import { Plus, BarChart3, Users } from "lucide-react";
 
 interface AdminActionsProps {
   onAddVehicle: () => void;
+  onManageUsers: () => void;
   stats: {
     total: number;
     available: number;
@@ -13,7 +14,7 @@ interface AdminActionsProps {
   };
 }
 
-const AdminActions = ({ onAddVehicle, stats }: AdminActionsProps) => {
+const AdminActions = ({ onAddVehicle, onManageUsers, stats }: AdminActionsProps) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card className="border-blue-200 bg-blue-50">
@@ -36,6 +37,18 @@ const AdminActions = ({ onAddVehicle, stats }: AdminActionsProps) => {
               <div className="text-center">
                 <div className="font-semibold text-base">Add New Vehicle</div>
                 <div className="text-sm opacity-90">Expand the fleet</div>
+              </div>
+            </Button>
+            
+            <Button 
+              onClick={onManageUsers}
+              variant="outline"
+              className="h-auto py-4 px-6 flex items-center justify-center gap-3 border-blue-300 text-blue-700 hover:bg-blue-100"
+            >
+              <Users className="w-5 h-5" />
+              <div className="text-center">
+                <div className="font-semibold text-base">Manage Users</div>
+                <div className="text-sm opacity-90">Assign roles and permissions</div>
               </div>
             </Button>
           </div>

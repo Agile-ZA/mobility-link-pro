@@ -9,6 +9,7 @@ import AdminHeader from "./admin/AdminHeader";
 import AdminStats from "./admin/AdminStats";
 import AdminActions from "./admin/AdminActions";
 import AdminVehicleTable from "./admin/AdminVehicleTable";
+import UserRoleManagement from "./admin/UserRoleManagement";
 import { ArrowLeft } from "lucide-react";
 import { Vehicle } from "@/types/vehicle";
 
@@ -20,6 +21,7 @@ const AdminPanel = ({ onNavigateBack }: AdminPanelProps) => {
   const { userRole } = useUserRole();
   const { vehicles, fetchVehicles } = useAdminVehicles();
   const [showAddForm, setShowAddForm] = useState(false);
+  const [showUserManagement, setShowUserManagement] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
 
   const handleAddSuccess = () => {
@@ -94,8 +96,13 @@ const AdminPanel = ({ onNavigateBack }: AdminPanelProps) => {
 
       <AdminActions 
         onAddVehicle={() => setShowAddForm(true)}
+        onManageUsers={() => setShowUserManagement(!showUserManagement)}
         stats={stats}
       />
+
+      {userRole === 'admin' && (
+        <UserRoleManagement isOpen={showUserManagement} />
+      )}
 
       <AdminVehicleTable 
         vehicles={vehicles}

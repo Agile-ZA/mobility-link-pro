@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -20,8 +21,8 @@ export const useBookingHistory = (vehicleId?: string) => {
         .from('booking_history')
         .select(`
           *,
-          profiles!booking_history_user_id_profiles_id_fkey(full_name, email),
-          vehicles!booking_history_vehicle_id_vehicles_id_fkey(registration_number, make, model)
+          profiles!user_id(full_name, email),
+          vehicles!vehicle_id(registration_number, make, model)
         `)
         .order('booked_at', { ascending: false });
 

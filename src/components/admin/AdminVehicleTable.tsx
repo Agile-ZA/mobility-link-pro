@@ -11,6 +11,36 @@ interface AdminVehicleTableProps {
   onEditVehicle: (vehicle: Vehicle) => void;
 }
 
+const getStatusBadgeProps = (status: Vehicle['status']) => {
+  switch (status) {
+    case 'available':
+      return { 
+        variant: 'default' as const, 
+        className: 'bg-green-600 hover:bg-green-700 text-white border-0' 
+      };
+    case 'booked':
+      return { 
+        variant: 'secondary' as const, 
+        className: 'bg-blue-600 hover:bg-blue-700 text-white border-0' 
+      };
+    case 'maintenance':
+      return { 
+        variant: 'destructive' as const, 
+        className: 'bg-amber-600 hover:bg-amber-700 text-white border-0' 
+      };
+    case 'damaged':
+      return { 
+        variant: 'destructive' as const, 
+        className: 'bg-red-600 hover:bg-red-700 text-white border-0' 
+      };
+    default:
+      return { 
+        variant: 'outline' as const, 
+        className: '' 
+      };
+  }
+};
+
 const AdminVehicleTable = ({ vehicles, onEditVehicle }: AdminVehicleTableProps) => {
   return (
     <Card className="border-slate-200">
@@ -37,41 +67,41 @@ const AdminVehicleTable = ({ vehicles, onEditVehicle }: AdminVehicleTableProps) 
             </TableRow>
           </TableHeader>
           <TableBody>
-            {vehicles.map((vehicle) => (
-              <TableRow key={vehicle.id}>
-                <TableCell className="font-medium">{vehicle.registration_number}</TableCell>
-                <TableCell>{vehicle.make} {vehicle.model} ({vehicle.year})</TableCell>
-                <TableCell className="capitalize">{vehicle.type}</TableCell>
-                <TableCell>
-                  <Badge 
-                    variant={
-                      vehicle.status === 'available' ? 'default' :
-                      vehicle.status === 'booked' ? 'secondary' :
-                      vehicle.status === 'maintenance' ? 'destructive' : 'outline'
-                    }
-                  >
-                    {vehicle.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  {vehicle.site?.name || 'No site assigned'}
-                </TableCell>
-                <TableCell>
-                  {vehicle.profile?.full_name || vehicle.profile?.email || 'Unassigned'}
-                </TableCell>
-                <TableCell>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onEditVehicle(vehicle)}
-                    className="flex items-center gap-1"
-                  >
-                    <Edit className="w-3 h-3" />
-                    Edit
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {vehicles.map((vehicle) => {
+              const badgeProps = getStatusBadgeProps(vehicle.status);
+              return (
+                <TableRow key={vehicle.id}>
+                  <TableCell className="font-medium">{vehicle.registration_number}</TableCell>
+                  <TableCell>{vehicle.make} {vehicle.model} ({vehicle.year})</TableCell>
+                  <TableCell className="capitalize">{vehicle.type}</TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant={badgeProps.variant}
+                      className={badgeProps.className}
+                    >
+                      {vehicle.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {vehicle.site?.name || 'No site assigned'}
+                  </TableCell>
+                  <TableCell>
+                    {vehicle.profile?.full_name || vehicle.profile?.email || 'Unassigned'}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onEditVehicle(vehicle)}
+                      className="flex items-center gap-1"
+                    >
+                      <Edit className="w-3 h-3" />
+                      Edit
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
         {vehicles.length === 0 && (

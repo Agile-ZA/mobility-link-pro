@@ -30,12 +30,12 @@ const AdminActions = ({ onAddVehicle, stats }: AdminActionsProps) => {
           <div className="grid grid-cols-1 gap-3">
             <Button 
               onClick={onAddVehicle}
-              className="h-16 flex flex-col items-center justify-center space-y-2 bg-blue-600 hover:bg-blue-700"
+              className="h-auto py-4 px-6 flex items-center justify-center gap-3 bg-blue-600 hover:bg-blue-700"
             >
               <Plus className="w-5 h-5" />
               <div className="text-center">
-                <div className="font-semibold">Add New Vehicle</div>
-                <div className="text-xs opacity-90">Expand the fleet</div>
+                <div className="font-semibold text-base">Add New Vehicle</div>
+                <div className="text-sm opacity-90">Expand the fleet</div>
               </div>
             </Button>
           </div>

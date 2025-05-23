@@ -12,10 +12,28 @@ export const useVehicleOperations = () => {
     setLoading(true);
     
     try {
-      // Make sure site_id is included in the data
+      // Ensure required fields are present and properly typed for database insert
+      const insertData = {
+        registration_number: vehicleData.registration_number!,
+        make: vehicleData.make!,
+        model: vehicleData.model!,
+        year: vehicleData.year!,
+        type: vehicleData.type!,
+        status: vehicleData.status!,
+        location: vehicleData.location!,
+        last_inspection: vehicleData.last_inspection!,
+        next_maintenance: vehicleData.next_maintenance!,
+        image_url: vehicleData.image_url || null,
+        site_id: vehicleData.site_id || null,
+        mileage: vehicleData.mileage || null,
+        operating_hours: vehicleData.operating_hours || null,
+        fuel_level: vehicleData.fuel_level || null,
+        battery_level: vehicleData.battery_level || null,
+      };
+
       const { error } = await supabase
         .from('vehicles')
-        .insert(vehicleData);
+        .insert(insertData);
         
       if (error) throw error;
       

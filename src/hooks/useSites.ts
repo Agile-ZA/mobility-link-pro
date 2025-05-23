@@ -35,6 +35,8 @@ export const useSites = () => {
         if (profileData?.site_id) {
           const userSiteData = sitesData?.find(site => site.id === profileData.site_id);
           setUserSite(userSiteData as Site || null);
+        } else {
+          setUserSite(null);
         }
       }
     } catch (error) {
@@ -55,6 +57,7 @@ export const useSites = () => {
         
       if (error) throw error;
       
+      // Refresh site data after updating
       await fetchSites();
       return { success: true };
     } catch (error) {

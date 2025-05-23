@@ -1,6 +1,5 @@
 
-import { useState } from "react";
-import { useAuth } from "@/hooks/useAuth";
+import { useState, useEffect } from "react";
 import { useSites } from "@/hooks/useSites";
 import { 
   Dialog, 
@@ -21,15 +20,30 @@ const UserProfileSettings = () => {
   const [isUpdating, setIsUpdating] = useState(false);
   const { toast } = useToast();
   
+  useEffect(() => {
+    if (userSite) {
+      setSelectedSiteId(userSite.id);
+    }
+  }, [userSite]);
+  
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (open && userSite) {
       setSelectedSiteId(userSite.id);
+    } else if (open) {
+      setSelectedSiteId("");
     }
   };
   
   const handleUpdateSite = async () => {
-    if (!selectedSiteId) return;
+    if (!selectedSiteId) {
+      toast({
+        title: "No Site Selected",
+        description: "Please select a site to update your assignment.",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsUpdating(true);
     const result = await updateUserSite(selectedSiteId);
@@ -53,7 +67,7 @@ const UserProfileSettings = () => {
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9">
+        <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Profile Settings">
           <Settings className="h-4 w-4" />
         </Button>
       </DialogTrigger>
@@ -78,11 +92,17 @@ const UserProfileSettings = () => {
               <SelectContent>
                 {sites.map((site) => (
                   <SelectItem key={site.id} value={site.id}>
-                    {site.name} ({site.location || 'No location'})
+                    {site.name} {site.location ? `(${site.location})` : ''}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+            
+            {userSite && (
+              <p className="text-xs text-slate-400 mt-1">
+                Currently assigned to: {userSite.name} {userSite.location ? `(${userSite.location})` : ''}
+              </p>
+            )}
           </div>
           
           <div className="flex justify-end gap-3">

@@ -1,8 +1,6 @@
-
+import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
-import { useUserRole } from "@/hooks/useUserRole";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,81 +9,75 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { useUserRole } from "@/hooks/useUserRole";
+import { useSites } from "@/hooks/useSites";
+import { Badge } from "@/components/ui/badge";
+import { MapPin } from "lucide-react";
 
 const UserHeader = () => {
   const { user, signOut } = useAuth();
-  const { userRole, isFleetAdmin } = useUserRole();
+  const { userRole } = useUserRole();
+  const { userSite } = useSites();
+  const [isSigningOut, setIsSigningOut] = useState(false);
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+    await signOut();
+    setIsSigningOut(false);
+  };
 
   if (!user) return null;
 
-  const handleSignOut = async () => {
-    await signOut();
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
   };
 
-  const getRoleBadge = () => {
-    if (!userRole) return null;
-    
-    const roleConfig = {
-      admin: { label: 'Admin', className: 'bg-red-600 text-white' },
-      fleet_admin: { label: 'Fleet Admin', className: 'bg-blue-600 text-white' },
-      user: { label: 'User', className: 'bg-slate-600 text-white' }
-    };
-
-    const config = roleConfig[userRole];
-    return (
-      <Badge className={config.className}>
-        {config.label}
-      </Badge>
-    );
-  };
+  const displayName = user.user_metadata?.full_name || user.email || 'User';
+  const initials = getInitials(displayName);
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="h-auto p-2 space-x-3">
-          <div className="flex items-center space-x-3">
-            <div className="w-8 h-8 bg-slate-900 rounded-full flex items-center justify-center">
-              <span className="text-white text-sm font-semibold">
-                {user.email?.charAt(0).toUpperCase()}
-              </span>
-            </div>
-            <div className="text-left hidden md:block">
-              <div className="flex items-center space-x-2">
-                <p className="text-sm font-medium text-slate-900 leading-none">
-                  {user.user_metadata?.full_name || user.email}
-                </p>
-                {getRoleBadge()}
-              </div>
-              <p className="text-xs text-slate-600 mt-1">
-                {user.email}
-              </p>
-            </div>
-          </div>
+        <Button variant="ghost" className="relative h-10 w-10 rounded-full">
+          <Avatar className="h-10 w-10 border border-slate-200">
+            <AvatarFallback className="bg-slate-100 text-slate-600">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
         <DropdownMenuLabel>
-          <div className="space-y-1">
-            <p className="text-sm font-medium">
-              {user.user_metadata?.full_name || 'User'}
-            </p>
-            <div className="flex items-center space-x-2">
-              <p className="text-xs text-slate-600">{user.email}</p>
-              {getRoleBadge()}
-            </div>
+          <div className="flex flex-col space-y-1">
+            <p className="text-sm font-medium leading-none">{displayName}</p>
+            <p className="text-xs leading-none text-slate-500">{user.email}</p>
+            {userRole && (
+              <Badge className="mt-1 self-start" variant="outline">
+                {userRole === 'admin' ? 'Administrator' : 
+                 userRole === 'fleet_admin' ? 'Fleet Manager' : 'User'}
+              </Badge>
+            )}
+            {userSite && (
+              <div className="flex items-center gap-1 mt-1 text-xs text-slate-500">
+                <MapPin className="h-3 w-3" />
+                <span>{userSite.name}</span>
+              </div>
+            )}
           </div>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
-        {isFleetAdmin && (
-          <>
-            <DropdownMenuItem disabled>
-              Fleet Management Access
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-          </>
-        )}
-        <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
-          Sign out
+        <DropdownMenuItem
+          className="cursor-pointer"
+          disabled={isSigningOut}
+          onClick={handleSignOut}
+        >
+          {isSigningOut ? "Signing out..." : "Sign out"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

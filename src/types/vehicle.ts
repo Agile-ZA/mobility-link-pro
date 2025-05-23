@@ -17,9 +17,14 @@ export interface Vehicle {
   battery_level?: number;
   current_user_id?: string;
   booked_at?: string;
+  site_id?: string;
   profile?: {
     full_name: string;
     email: string;
+  };
+  site?: {
+    name: string;
+    location: string;
   };
 }
 

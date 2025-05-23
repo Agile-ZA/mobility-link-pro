@@ -1,27 +1,15 @@
-
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-
-interface AddVehicleFormData {
-  registration_number: string;
-  type: 'truck' | 'forklift' | 'car';
-  make: string;
-  model: string;
-  year: number;
-  location: string;
-  image_url?: string;
-  mileage?: number;
-  operating_hours?: number;
-  fuel_level?: number;
-  battery_level?: number;
-}
+import { useToast } from "@/hooks/use-toast";
+import { useVehicleOperations } from "@/hooks/useVehicleOperations";
+import { useSites } from "@/hooks/useSites";
+import VehicleBasicInfo from "./VehicleBasicInfo";
+import { ArrowLeft } from "lucide-react";
+import { Vehicle } from "@/types/vehicle";
 
 interface AddVehicleFormProps {
   onSuccess: () => void;
@@ -29,266 +17,140 @@ interface AddVehicleFormProps {
 }
 
 const AddVehicleForm = ({ onSuccess, onCancel }: AddVehicleFormProps) => {
-  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    registration_number: '',
+    make: '',
+    model: '',
+    year: '',
+    type: 'truck',
+    location: '',
+    last_inspection: new Date().toISOString().split('T')[0],
+    next_maintenance: new Date().toISOString().split('T')[0],
+    image_url: '',
+    site_id: '',
+  });
+  const { sites } = useSites();
+  const { addVehicle, loading } = useVehicleOperations();
   const { toast } = useToast();
-  const form = useForm<AddVehicleFormData>();
 
-  const onSubmit = async (data: AddVehicleFormData) => {
-    setLoading(true);
-    try {
-      const vehicleData = {
-        ...data,
-        status: 'available',
-        last_inspection: new Date().toISOString().split('T')[0],
-        next_maintenance: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().split('T')[0], // 90 days from now
-      };
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
-      const { error } = await supabase
-        .from('vehicles')
-        .insert([vehicleData]);
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
 
-      if (error) throw error;
+    const requiredFields = ['registration_number', 'make', 'model', 'year', 'type', 'location', 'last_inspection', 'next_maintenance'];
+    for (const field of requiredFields) {
+      if (!formData[field as keyof typeof formData]) {
+        toast({
+          title: "Missing Information",
+          description: `Please fill in all required fields, including ${field.replace(/_/g, ' ')}.`,
+          variant: "destructive",
+        });
+        return;
+      }
+    }
 
+    const vehicleData: Partial<Vehicle> = {
+      ...formData,
+      year: parseInt(formData.year),
+    };
+
+    const result = await addVehicle(vehicleData);
+
+    if (result.success) {
       toast({
-        title: "Vehicle Added Successfully",
-        description: `${data.registration_number} has been added to the fleet.`,
+        title: "Vehicle Added",
+        description: `${formData.make} ${formData.model} - ${formData.registration_number} has been added to the fleet.`,
       });
-
       onSuccess();
-    } catch (error) {
-      console.error('Error adding vehicle:', error);
+    } else {
       toast({
         title: "Error Adding Vehicle",
-        description: "Failed to add vehicle to the fleet.",
+        description: "Failed to add the vehicle. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
     <Card className="border-slate-200">
       <CardHeader>
-        <CardTitle className="text-slate-900">Add New Vehicle</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-slate-900">Add New Vehicle</CardTitle>
+          <Button variant="ghost" onClick={onCancel}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Cancel
+          </Button>
+        </div>
       </CardHeader>
-      <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="registration_number"
-                rules={{ required: "Registration number is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Registration Number</FormLabel>
-                    <FormControl>
-                      <Input placeholder="ABC-123" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+      <CardContent className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <VehicleBasicInfo formData={formData} onInputChange={handleInputChange} />
 
-              <FormField
-                control={form.control}
-                name="type"
-                rules={{ required: "Vehicle type is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Vehicle Type</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select vehicle type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="truck">Commercial Truck</SelectItem>
-                        <SelectItem value="forklift">Industrial Forklift</SelectItem>
-                        <SelectItem value="car">Executive Vehicle</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <div className="space-y-2">
+            <Label htmlFor="location">Location</Label>
+            <Input
+              id="location"
+              value={formData.location}
+              onChange={(e) => handleInputChange('location', e.target.value)}
+              required
+            />
+          </div>
 
-              <FormField
-                control={form.control}
-                name="make"
-                rules={{ required: "Make is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Make</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Toyota" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <div className="space-y-2">
+            <Label htmlFor="last_inspection">Last Inspection Date</Label>
+            <Input
+              type="date"
+              id="last_inspection"
+              value={formData.last_inspection}
+              onChange={(e) => handleInputChange('last_inspection', e.target.value)}
+              required
+            />
+          </div>
 
-              <FormField
-                control={form.control}
-                name="model"
-                rules={{ required: "Model is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Model</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Hilux" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <div className="space-y-2">
+            <Label htmlFor="next_maintenance">Next Maintenance Date</Label>
+            <Input
+              type="date"
+              id="next_maintenance"
+              value={formData.next_maintenance}
+              onChange={(e) => handleInputChange('next_maintenance', e.target.value)}
+              required
+            />
+          </div>
 
-              <FormField
-                control={form.control}
-                name="year"
-                rules={{ 
-                  required: "Year is required",
-                  min: { value: 1900, message: "Year must be valid" },
-                  max: { value: new Date().getFullYear() + 1, message: "Year cannot be in the future" }
-                }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Year</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="2023" 
-                        {...field} 
-                        onChange={(e) => field.onChange(parseInt(e.target.value))}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <div className="space-y-2">
+            <Label htmlFor="image_url">Image URL</Label>
+            <Input
+              id="image_url"
+              type="url"
+              value={formData.image_url}
+              onChange={(e) => handleInputChange('image_url', e.target.value)}
+            />
+          </div>
 
-              <FormField
-                control={form.control}
-                name="location"
-                rules={{ required: "Location is required" }}
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Location</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Main Depot" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+          <div className="space-y-2">
+            <Label htmlFor="site_id">Site Assignment</Label>
+            <Select value={formData.site_id} onValueChange={(value) => handleInputChange('site_id', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a site" />
+              </SelectTrigger>
+              <SelectContent>
+                {sites.map((site) => (
+                  <SelectItem key={site.id} value={site.id}>
+                    {site.name} ({site.location || 'No location'})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-              <FormField
-                control={form.control}
-                name="image_url"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Image URL (Optional)</FormLabel>
-                    <FormControl>
-                      <Input placeholder="https://example.com/image.jpg" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="mileage"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Mileage (Optional)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="50000" 
-                        {...field} 
-                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="operating_hours"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Operating Hours (Optional)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        placeholder="2500" 
-                        {...field} 
-                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="fuel_level"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fuel Level % (Optional)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        min="0" 
-                        max="100" 
-                        placeholder="75" 
-                        {...field} 
-                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="battery_level"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Battery Level % (Optional)</FormLabel>
-                    <FormControl>
-                      <Input 
-                        type="number" 
-                        min="0" 
-                        max="100" 
-                        placeholder="85" 
-                        {...field} 
-                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <Button type="submit" disabled={loading} className="bg-slate-900 hover:bg-slate-800">
-                {loading ? "Adding Vehicle..." : "Add Vehicle"}
-              </Button>
-              <Button type="button" variant="outline" onClick={onCancel}>
-                Cancel
-              </Button>
-            </div>
-          </form>
-        </Form>
+          <Button type="submit" disabled={loading} className="w-full bg-slate-900 hover:bg-slate-800">
+            {loading ? 'Adding...' : 'Add Vehicle'}
+          </Button>
+        </form>
       </CardContent>
     </Card>
   );

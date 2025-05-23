@@ -1,13 +1,15 @@
-import { useMemo } from "react";
+
+import { useMemo, useState } from "react";
 import { useVehicles } from "@/hooks/useVehicles";
 import { Vehicle } from "@/types/vehicle";
 import { useAuth } from "@/hooks/useAuth";
+import { useSites } from "@/hooks/useSites"; 
 import VehicleCard from "./VehicleCard";
 import FleetAdminPanel from "./FleetAdminPanel";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2, MapPin } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface VehicleListProps {
   onVehicleSelect: (vehicle: Vehicle) => void;
@@ -16,6 +18,7 @@ interface VehicleListProps {
 const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
   const { vehicles, loading } = useVehicles();
   const { user } = useAuth();
+  const { userSite, loading: siteLoading } = useSites();
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("available");
 
@@ -46,7 +49,7 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
     return { total, available, booked, maintenance, damaged };
   }, [vehicles]);
 
-  if (loading) {
+  if (loading || siteLoading) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="flex items-center gap-3">
@@ -62,7 +65,15 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
       <div className="space-y-4">
         <div>
           <h2 className="text-3xl font-bold text-slate-900">Fleet Overview</h2>
-          <p className="text-slate-600 mt-1">Monitor and manage your corporate vehicle fleet</p>
+          <div className="flex items-center gap-2 mt-1">
+            <p className="text-slate-600">Monitor and manage your corporate vehicle fleet</p>
+            {userSite && (
+              <Badge variant="outline" className="flex items-center gap-1 border-blue-200 bg-blue-50 text-blue-800">
+                <MapPin className="w-3 h-3" />
+                {userSite.name}
+              </Badge>
+            )}
+          </div>
         </div>
 
         {userVehicle && (
@@ -72,7 +83,10 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
                 <div>
                   <p className="text-sm font-medium text-blue-800">Your Assigned Vehicle</p>
                   <p className="text-lg font-bold text-blue-900">{userVehicle.registration_number}</p>
-                  <p className="text-sm text-blue-700">{userVehicle.make} {userVehicle.model} • {userVehicle.location}</p>
+                  <p className="text-sm text-blue-700">
+                    {userVehicle.make} {userVehicle.model} • 
+                    {userVehicle.site?.name ? ` ${userVehicle.site.name}` : ` ${userVehicle.location}`}
+                  </p>
                 </div>
                 <button
                   onClick={() => onVehicleSelect(userVehicle)}

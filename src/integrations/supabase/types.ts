@@ -18,6 +18,7 @@ export type Database = {
           full_name: string | null
           id: string
           phone: string | null
+          site_id: string | null
           updated_at: string
         }
         Insert: {
@@ -28,6 +29,7 @@ export type Database = {
           full_name?: string | null
           id: string
           phone?: string | null
+          site_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -38,6 +40,42 @@ export type Database = {
           full_name?: string | null
           id?: string
           phone?: string | null
+          site_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sites: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          name?: string
           updated_at?: string
         }
         Relationships: []
@@ -80,6 +118,7 @@ export type Database = {
           next_maintenance: string
           operating_hours: number | null
           registration_number: string
+          site_id: string | null
           status: string
           type: string
           updated_at: string
@@ -101,6 +140,7 @@ export type Database = {
           next_maintenance: string
           operating_hours?: number | null
           registration_number: string
+          site_id?: string | null
           status: string
           type: string
           updated_at?: string
@@ -122,6 +162,7 @@ export type Database = {
           next_maintenance?: string
           operating_hours?: number | null
           registration_number?: string
+          site_id?: string | null
           status?: string
           type?: string
           updated_at?: string
@@ -133,6 +174,13 @@ export type Database = {
             columns: ["current_user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "vehicles_site_id_fkey"
+            columns: ["site_id"]
+            isOneToOne: false
+            referencedRelation: "sites"
             referencedColumns: ["id"]
           },
         ]

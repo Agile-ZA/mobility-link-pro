@@ -42,7 +42,7 @@ const UserRoleManagement = ({ isOpen }: UserRoleManagementProps) => {
   };
 
   const handleRoleChange = (userId: string, value: string | null) => {
-    if (!value) {
+    if (!value || value === "none") {
       removeRole(userId);
     } else {
       assignRole(userId, value as UserRole);
@@ -97,17 +97,17 @@ const UserRoleManagement = ({ isOpen }: UserRoleManagementProps) => {
                     <TableCell>{getRoleBadge(user.role)}</TableCell>
                     <TableCell>
                       <Select
-                        value={user.role || ""}
+                        value={user.role || "none"}
                         onValueChange={(value) => handleRoleChange(
                           user.id, 
-                          value === "" ? null : value
+                          value === "none" ? null : value
                         )}
                       >
                         <SelectTrigger className="w-[180px]">
                           <SelectValue placeholder="Select a role" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="">No Role</SelectItem>
+                          <SelectItem value="none">No Role</SelectItem>
                           <SelectItem value="user">User</SelectItem>
                           <SelectItem value="fleet_admin">Fleet Admin</SelectItem>
                           {userRole === 'admin' && (

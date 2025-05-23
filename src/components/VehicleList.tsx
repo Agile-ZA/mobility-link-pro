@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from "react";
 import { useVehicles } from "@/hooks/useVehicles";
 import { Vehicle } from "@/types/vehicle";
@@ -7,8 +6,9 @@ import { useSites } from "@/hooks/useSites";
 import VehicleCard from "./VehicleCard";
 import FleetAdminPanel from "./FleetAdminPanel";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, MapPin } from "lucide-react";
+import { Loader2, MapPin, RotateCcw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface VehicleListProps {
@@ -22,6 +22,12 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("available");
   const [selectedSite, setSelectedSite] = useState<string>("my-site");
+
+  const handleShowAll = () => {
+    setSelectedType("all");
+    setSelectedStatus("all");
+    setSelectedSite("all");
+  };
 
   // Filter vehicles based on selected filters
   const filteredVehicles = useMemo(() => {
@@ -225,6 +231,15 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
                     <SelectItem value="damaged">Damaged</SelectItem>
                   </SelectContent>
                 </Select>
+
+                <Button
+                  variant="outline"
+                  onClick={handleShowAll}
+                  className="flex items-center gap-2 border-slate-300 hover:bg-slate-50"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                  Show All
+                </Button>
               </div>
 
               <div className="text-sm text-slate-600">

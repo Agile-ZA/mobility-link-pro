@@ -2,10 +2,6 @@
 import { Vehicle } from "@/types/vehicle";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import InspectionForm from "./InspectionForm";
-import MaintenanceForm from "./MaintenanceForm";
-import VehicleBooking from "./VehicleBooking";
-import VehicleEditForm from "./VehicleEditForm";
 import VehicleHeader from "./VehicleHeader";
 import VehicleInfoCard from "./VehicleInfoCard";
 import VehicleOverviewTab from "./VehicleOverviewTab";
@@ -42,16 +38,10 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-3 order-1">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className={`grid w-full ${isFleetAdmin ? 'grid-cols-6' : 'grid-cols-4'} bg-slate-100 p-1`}>
+            <TabsList className={`grid w-full ${isFleetAdmin ? 'grid-cols-2' : 'grid-cols-1'} bg-slate-100 p-1`}>
               <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Overview</TabsTrigger>
-              <TabsTrigger value="booking" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Booking</TabsTrigger>
-              <TabsTrigger value="inspection" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Inspection</TabsTrigger>
-              <TabsTrigger value="maintenance" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Maintenance</TabsTrigger>
               {isFleetAdmin && (
-                <>
-                  <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">History</TabsTrigger>
-                  <TabsTrigger value="admin" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-red-600 font-semibold">Admin</TabsTrigger>
-                </>
+                <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">History</TabsTrigger>
               )}
             </TabsList>
             
@@ -59,18 +49,6 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
               <VehicleOverviewTab isFleetAdmin={isFleetAdmin} setActiveTab={setActiveTab} vehicleStatus={vehicle.status} />
             </TabsContent>
 
-            <TabsContent value="booking" className="mt-4">
-              <VehicleBooking vehicle={vehicle} onVehicleUpdate={handleVehicleUpdated} />
-            </TabsContent>
-            
-            <TabsContent value="inspection" className="mt-4">
-              <InspectionForm vehicle={vehicle} />
-            </TabsContent>
-            
-            <TabsContent value="maintenance" className="mt-4">
-              <MaintenanceForm vehicle={vehicle} />
-            </TabsContent>
-            
             {isFleetAdmin && (
               <TabsContent value="history" className="mt-4">
                 <BookingHistoryTable 
@@ -78,28 +56,6 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
                   loading={historyLoading}
                   showVehicleInfo={false}
                 />
-              </TabsContent>
-            )}
-            
-            {isFleetAdmin && (
-              <TabsContent value="admin" className="mt-4">
-                <Card className="border-red-200 bg-red-50">
-                  <CardHeader>
-                    <CardTitle className="text-red-900 flex items-center gap-2">
-                      <span className="text-xl">⚙️</span>
-                      Administrator Functions
-                    </CardTitle>
-                    <p className="text-red-700 text-sm">
-                      Manage and edit vehicle details. Changes are permanent and will affect all users.
-                    </p>
-                  </CardHeader>
-                  <CardContent>
-                    <VehicleEditForm 
-                      vehicle={vehicle} 
-                      onSuccess={handleVehicleUpdated}
-                    />
-                  </CardContent>
-                </Card>
               </TabsContent>
             )}
           </Tabs>

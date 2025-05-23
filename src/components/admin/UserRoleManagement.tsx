@@ -57,7 +57,7 @@ const UserRoleManagement = ({ isOpen }: UserRoleManagementProps) => {
   };
 
   return (
-    <Card className="border-slate-200 mt-6">
+    <Card className="border-slate-200">
       <CardHeader>
         <CardTitle className="text-slate-900 flex items-center gap-2">
           <Users className="w-5 h-5" />

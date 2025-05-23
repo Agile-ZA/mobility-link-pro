@@ -12,6 +12,7 @@ import AdminVehicleTable from "./admin/AdminVehicleTable";
 import UserRoleManagement from "./admin/UserRoleManagement";
 import { ArrowLeft } from "lucide-react";
 import { Vehicle } from "@/types/vehicle";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 interface AdminPanelProps {
   onNavigateBack: () => void;
@@ -21,7 +22,7 @@ const AdminPanel = ({ onNavigateBack }: AdminPanelProps) => {
   const { userRole, isFleetAdmin } = useUserRole();
   const { vehicles, fetchVehicles } = useAdminVehicles();
   const [showAddForm, setShowAddForm] = useState(false);
-  const [showUserManagement, setShowUserManagement] = useState(false);
+  const [activeTab, setActiveTab] = useState<string>("vehicles");
   const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
 
   const handleAddSuccess = () => {
@@ -93,20 +94,35 @@ const AdminPanel = ({ onNavigateBack }: AdminPanelProps) => {
         booked={stats.booked}
         maintenance={stats.maintenance}
       />
+      
+      <Tabs defaultValue="vehicles" value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="grid grid-cols-2 w-full max-w-md mb-4">
+          <TabsTrigger value="vehicles">Vehicle Management</TabsTrigger>
+          {isFleetAdmin && <TabsTrigger value="users">User Management</TabsTrigger>}
+        </TabsList>
 
-      <AdminActions 
-        onAddVehicle={() => setShowAddForm(true)}
-        onManageUsers={() => setShowUserManagement(!showUserManagement)}
-        stats={stats}
-        showUserManagement={isFleetAdmin}
-      />
+        <TabsContent value="vehicles" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <AdminActions 
+              onAddVehicle={() => setShowAddForm(true)}
+              onManageUsers={() => setActiveTab("users")}
+              showUserManagement={false} // Hide the user management button in this tab
+              stats={stats}
+            />
+          </div>
 
-      <UserRoleManagement isOpen={showUserManagement && isFleetAdmin} />
+          <AdminVehicleTable 
+            vehicles={vehicles}
+            onEditVehicle={setEditingVehicle}
+          />
+        </TabsContent>
 
-      <AdminVehicleTable 
-        vehicles={vehicles}
-        onEditVehicle={setEditingVehicle}
-      />
+        {isFleetAdmin && (
+          <TabsContent value="users" className="space-y-6">
+            <UserRoleManagement isOpen={true} />
+          </TabsContent>
+        )}
+      </Tabs>
     </div>
   );
 };

@@ -20,9 +20,19 @@ export const useBookingHistory = (vehicleId?: string) => {
       let query = supabase
         .from('booking_history')
         .select(`
-          *,
-          profiles!user_id(full_name, email),
-          vehicles!vehicle_id(registration_number, make, model)
+          id,
+          vehicle_id,
+          user_id,
+          booked_at,
+          returned_at,
+          initial_mileage,
+          return_mileage,
+          initial_operating_hours,
+          return_operating_hours,
+          comments,
+          created_at,
+          profiles(full_name, email),
+          vehicles(registration_number, make, model)
         `)
         .order('booked_at', { ascending: false });
 
@@ -37,7 +47,17 @@ export const useBookingHistory = (vehicleId?: string) => {
 
       // Transform the data to match our BookingHistory type
       const transformedData: BookingHistory[] = (data || []).map(record => ({
-        ...record,
+        id: record.id,
+        vehicle_id: record.vehicle_id,
+        user_id: record.user_id,
+        booked_at: record.booked_at,
+        returned_at: record.returned_at,
+        initial_mileage: record.initial_mileage,
+        return_mileage: record.return_mileage,
+        initial_operating_hours: record.initial_operating_hours,
+        return_operating_hours: record.return_operating_hours,
+        comments: record.comments,
+        created_at: record.created_at,
         profile: record.profiles,
         vehicle: record.vehicles
       }));

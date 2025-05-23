@@ -1,24 +1,25 @@
 
 export interface Vehicle {
   id: string;
-  registrationNumber: string;
+  registration_number: string;
   type: 'truck' | 'forklift' | 'car';
   make: string;
   model: string;
   year: number;
   status: 'available' | 'booked' | 'maintenance' | 'damaged';
-  imageUrl: string;
+  image_url: string;
   mileage?: number;
-  operatingHours?: number;
+  operating_hours?: number;
   location: string;
-  lastInspection: string;
-  nextMaintenance: string;
-  fuelLevel?: number;
-  batteryLevel?: number;
-  currentUser?: {
-    name: string;
-    id: string;
-    bookedAt: string;
+  last_inspection: string;
+  next_maintenance: string;
+  fuel_level?: number;
+  battery_level?: number;
+  current_user_id?: string;
+  booked_at?: string;
+  profile?: {
+    full_name: string;
+    email: string;
   };
 }
 

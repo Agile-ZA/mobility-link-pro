@@ -11,79 +11,68 @@ interface VehicleInfoCardProps {
 const VehicleInfoCard = ({ vehicle }: VehicleInfoCardProps) => {
   return (
     <Card className="border-slate-200">
-      <CardHeader className="bg-slate-50 border-b border-slate-200">
-        <CardTitle className="text-slate-900">Vehicle Information</CardTitle>
+      <CardHeader className="bg-slate-50 border-b border-slate-200 py-3">
+        <CardTitle className="text-slate-900 text-lg">Vehicle Information</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
-        <div className="grid grid-cols-2 divide-y divide-slate-100">
-          <div className="p-4 border-r border-slate-100">
-            <p className="text-sm font-medium text-slate-500">Registration</p>
-            <p className="mt-1 font-medium">{vehicle.registration_number}</p>
+        <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 divide-slate-100">
+          <div className="p-3 border-r border-slate-100">
+            <p className="text-xs font-medium text-slate-500">Registration</p>
+            <p className="mt-0.5 font-medium">{vehicle.registration_number}</p>
           </div>
-          <div className="p-4">
-            <p className="text-sm font-medium text-slate-500">Type</p>
-            <p className="mt-1 capitalize">
+          <div className="p-3 border-r border-slate-100">
+            <p className="text-xs font-medium text-slate-500">Make / Model</p>
+            <p className="mt-0.5">{vehicle.make} {vehicle.model}</p>
+          </div>
+          <div className="p-3 border-r border-slate-100">
+            <p className="text-xs font-medium text-slate-500">Year</p>
+            <p className="mt-0.5">{vehicle.year}</p>
+          </div>
+          <div className="p-3">
+            <p className="text-xs font-medium text-slate-500">Type</p>
+            <p className="mt-0.5 capitalize">
               {vehicle.type === 'truck' ? 'Commercial Truck' : 
                vehicle.type === 'forklift' ? 'Industrial Forklift' : 
                'Executive Vehicle'}
             </p>
           </div>
-          <div className="p-4 border-r border-slate-100">
-            <p className="text-sm font-medium text-slate-500">Make</p>
-            <p className="mt-1">{vehicle.make}</p>
-          </div>
-          <div className="p-4">
-            <p className="text-sm font-medium text-slate-500">Model</p>
-            <p className="mt-1">{vehicle.model}</p>
-          </div>
-          <div className="p-4 border-r border-slate-100">
-            <p className="text-sm font-medium text-slate-500">Year</p>
-            <p className="mt-1">{vehicle.year}</p>
-          </div>
-          <div className="p-4">
-            <p className="text-sm font-medium text-slate-500">
+          <div className="p-3 border-r border-slate-100">
+            <p className="text-xs font-medium text-slate-500">
               {vehicle.type === 'forklift' ? 'Operating Hours' : 'Mileage'}
             </p>
-            <p className="mt-1">
+            <p className="mt-0.5">
               {vehicle.type === 'forklift' 
                 ? vehicle.operating_hours ? `${vehicle.operating_hours} hrs` : 'N/A'
                 : vehicle.mileage ? `${vehicle.mileage.toLocaleString()} km` : 'N/A'}
             </p>
           </div>
-          <div className="p-4 border-r border-slate-100 flex items-start gap-2">
-            <MapPin className="w-4 h-4 text-slate-400 mt-0.5" />
+          <div className="p-3 flex items-start gap-1.5 border-r border-slate-100">
+            <MapPin className="w-3.5 h-3.5 text-slate-400 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-medium text-slate-500">Site</p>
-              <p className="mt-1">{vehicle.site?.name || 'Unassigned'}</p>
+              <p className="text-xs font-medium text-slate-500">Site</p>
+              <p className="mt-0.5 text-sm">{vehicle.site?.name || 'Unassigned'}</p>
             </div>
           </div>
-          <div className="p-4 flex items-start gap-2">
-            <MapPin className="w-4 h-4 text-slate-400 mt-0.5" />
+          <div className="p-3 flex items-start gap-1.5 border-r border-slate-100">
+            <Calendar className="w-3.5 h-3.5 text-slate-400 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-medium text-slate-500">Location</p>
-              <p className="mt-1">{vehicle.site?.location || vehicle.location}</p>
+              <p className="text-xs font-medium text-slate-500">Last Inspection</p>
+              <p className="mt-0.5 text-sm">{new Date(vehicle.last_inspection).toLocaleDateString()}</p>
             </div>
           </div>
-          <div className="p-4 border-r border-slate-100 flex items-start gap-2">
-            <Calendar className="w-4 h-4 text-slate-400 mt-0.5" />
+          <div className="p-3 flex items-start gap-1.5">
+            <Calendar className="w-3.5 h-3.5 text-slate-400 mt-0.5 flex-shrink-0" />
             <div>
-              <p className="text-sm font-medium text-slate-500">Last Inspection</p>
-              <p className="mt-1">{new Date(vehicle.last_inspection).toLocaleDateString()}</p>
-            </div>
-          </div>
-          <div className="p-4 flex items-start gap-2">
-            <Calendar className="w-4 h-4 text-slate-400 mt-0.5" />
-            <div>
-              <p className="text-sm font-medium text-slate-500">Next Maintenance</p>
-              <p className="mt-1">{new Date(vehicle.next_maintenance).toLocaleDateString()}</p>
+              <p className="text-xs font-medium text-slate-500">Next Maintenance</p>
+              <p className="mt-0.5 text-sm">{new Date(vehicle.next_maintenance).toLocaleDateString()}</p>
             </div>
           </div>
           {vehicle.booked_at && (
-            <div className="p-4 col-span-2 flex items-start gap-2">
-              <Clock className="w-4 h-4 text-slate-400 mt-0.5" />
+            <div className="p-3 col-span-2 sm:col-span-4 flex items-start gap-1.5 border-t border-slate-100">
+              <Clock className="w-3.5 h-3.5 text-slate-400 mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-slate-500">Booked Since</p>
-                <p className="mt-1">
+                <p className="text-xs font-medium text-slate-500">Booked Since</p>
+                <p className="mt-0.5 text-sm">
                   {format(parseISO(vehicle.booked_at), 'PPP')} ({format(parseISO(vehicle.booked_at), 'pp')})
                 </p>
               </div>

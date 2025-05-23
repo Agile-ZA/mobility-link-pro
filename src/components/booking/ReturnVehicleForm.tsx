@@ -75,12 +75,12 @@ const ReturnVehicleForm = ({ vehicle, onVehicleUpdate, onCancel }: ReturnVehicle
   };
 
   return (
-    <div className="space-y-4 border-t border-slate-200 pt-4">
+    <div className="space-y-3 border-t border-slate-200 pt-3">
       <h4 className="font-medium text-slate-900">Vehicle Return Information</h4>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="odometer" className="text-slate-700 font-medium">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="space-y-1.5">
+          <Label htmlFor="odometer" className="text-slate-700 font-medium text-sm">
             Odometer Reading *
           </Label>
           <Input
@@ -95,8 +95,8 @@ const ReturnVehicleForm = ({ vehicle, onVehicleUpdate, onCancel }: ReturnVehicle
         </div>
 
         {vehicle.type === 'forklift' && (
-          <div className="space-y-2">
-            <Label htmlFor="operatingHours" className="text-slate-700 font-medium">
+          <div className="space-y-1.5">
+            <Label htmlFor="operatingHours" className="text-slate-700 font-medium text-sm">
               Operating Hours
             </Label>
             <Input
@@ -111,8 +111,22 @@ const ReturnVehicleForm = ({ vehicle, onVehicleUpdate, onCancel }: ReturnVehicle
         )}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="returnImage" className="text-slate-700 font-medium flex items-center gap-2">
+      <div className="space-y-1.5">
+        <Label htmlFor="returnComments" className="text-slate-700 font-medium text-sm">
+          Comments (Optional)
+        </Label>
+        <Textarea
+          id="returnComments"
+          value={comments}
+          onChange={(e) => setComments(e.target.value)}
+          placeholder="Any issues, damage, or observations..."
+          rows={2}
+          className="border-slate-300 focus:border-slate-500 resize-none"
+        />
+      </div>
+
+      <div className="space-y-1.5">
+        <Label htmlFor="returnImage" className="text-slate-700 font-medium text-sm flex items-center gap-2">
           <Camera className="w-4 h-4" />
           Return Photo (Optional)
         </Label>
@@ -121,30 +135,16 @@ const ReturnVehicleForm = ({ vehicle, onVehicleUpdate, onCancel }: ReturnVehicle
           type="file"
           accept="image/*"
           onChange={handleImageChange}
-          className="file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 border-slate-300"
+          className="file:mr-4 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 border-slate-300 text-sm"
         />
         {imageFile && (
-          <p className="text-sm text-green-600 font-medium">
+          <p className="text-xs text-green-600 font-medium">
             ✓ Image selected: {imageFile.name}
           </p>
         )}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="returnComments" className="text-slate-700 font-medium">
-          Return Comments (Optional)
-        </Label>
-        <Textarea
-          id="returnComments"
-          value={comments}
-          onChange={(e) => setComments(e.target.value)}
-          placeholder="Any issues, damage, or observations..."
-          rows={3}
-          className="border-slate-300 focus:border-slate-500 resize-none"
-        />
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-2 pt-1">
         <Button 
           onClick={handleReturnVehicle}
           className="flex-1 bg-green-600 hover:bg-green-700 flex items-center gap-2"

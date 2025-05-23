@@ -54,27 +54,28 @@ const VehicleHeader = ({ vehicle, onBack }: VehicleHeaderProps) => {
   };
 
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-      <Button 
-        variant="outline" 
-        onClick={onBack}
-        className="border-slate-300 hover:bg-slate-50 flex items-center gap-2"
-      >
-        <ArrowLeft className="w-4 h-4" />
-        Back to Fleet
-      </Button>
-      <div className="flex-1">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">{vehicle.registration_number}</h1>
-            <p className="text-slate-600 text-lg">{vehicle.make} {vehicle.model} • {vehicle.year}</p>
-            <p className="text-slate-500 text-sm">{getVehicleTypeLabel(vehicle.type)}</p>
-          </div>
-          <Badge 
-            className={`text-base px-4 py-2 ${getStatusBadgeClass(vehicle.status)}`}
-          >
-            {getStatusLabel(vehicle.status)}
-          </Badge>
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2">
+        <Button 
+          variant="outline" 
+          onClick={onBack}
+          className="border-slate-300 hover:bg-slate-50 flex items-center gap-2"
+          size="sm"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Back to Fleet
+        </Button>
+        <Badge 
+          className={`text-sm px-3 py-1 ${getStatusBadgeClass(vehicle.status)}`}
+        >
+          {getStatusLabel(vehicle.status)}
+        </Badge>
+      </div>
+      
+      <div className="flex flex-wrap justify-between items-end gap-4">
+        <div>
+          <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">{vehicle.registration_number}</h1>
+          <p className="text-slate-600">{vehicle.make} {vehicle.model} • {vehicle.year} • {getVehicleTypeLabel(vehicle.type)}</p>
         </div>
       </div>
     </div>

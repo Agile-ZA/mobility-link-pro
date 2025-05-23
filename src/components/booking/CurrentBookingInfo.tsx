@@ -16,15 +16,15 @@ const CurrentBookingInfo = ({ vehicle, isUserVehicle, onVehicleUpdate }: Current
 
   if (isUserVehicle) {
     return (
-      <div className="space-y-4">
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <div className="flex items-center gap-3 mb-2">
-            <User className="w-5 h-5 text-blue-600" />
+      <div className="space-y-3">
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-center gap-2 mb-1">
+            <User className="w-4 h-4 text-blue-600" />
             <span className="font-medium text-blue-900">Currently Assigned to You</span>
           </div>
           {vehicle.booked_at && (
-            <p className="text-blue-700 text-sm flex items-center gap-1 mt-1">
-              <Calendar className="w-4 h-4" />
+            <p className="text-blue-700 text-xs flex items-center gap-1 mt-1">
+              <Calendar className="w-3.5 h-3.5" />
               Booked: {new Date(vehicle.booked_at).toLocaleString()}
             </p>
           )}
@@ -33,10 +33,11 @@ const CurrentBookingInfo = ({ vehicle, isUserVehicle, onVehicleUpdate }: Current
         {!showReturnForm ? (
           <Button 
             onClick={() => setShowReturnForm(true)}
-            className="w-full bg-green-600 hover:bg-green-700 flex items-center gap-2"
+            className="w-full bg-green-600 hover:bg-green-700 flex items-center justify-center gap-2 py-5"
+            size="lg"
           >
-            <Car className="w-4 h-4" />
-            Return Vehicle
+            <Car className="w-5 h-5" />
+            <span className="font-medium">Return Vehicle</span>
           </Button>
         ) : (
           <ReturnVehicleForm 
@@ -52,17 +53,17 @@ const CurrentBookingInfo = ({ vehicle, isUserVehicle, onVehicleUpdate }: Current
   // For other users viewing a booked vehicle
   if (vehicle.profile) {
     return (
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-        <div className="flex items-center gap-3 mb-2">
-          <User className="w-5 h-5 text-blue-600" />
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+        <div className="flex items-center gap-2 mb-1">
+          <User className="w-4 h-4 text-blue-600" />
           <span className="font-medium text-blue-900">Currently Booked</span>
         </div>
-        <p className="text-blue-800">
+        <p className="text-blue-800 text-sm">
           <strong>User:</strong> {vehicle.profile.full_name}
         </p>
         {vehicle.booked_at && (
-          <p className="text-blue-700 text-sm flex items-center gap-1 mt-1">
-            <Calendar className="w-4 h-4" />
+          <p className="text-blue-700 text-xs flex items-center gap-1 mt-1">
+            <Calendar className="w-3.5 h-3.5" />
             Booked: {new Date(vehicle.booked_at).toLocaleString()}
           </p>
         )}

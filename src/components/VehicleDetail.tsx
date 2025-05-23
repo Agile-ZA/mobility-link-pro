@@ -33,15 +33,11 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <VehicleHeader vehicle={vehicle} onBack={onBack} />
 
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-        <div className="xl:col-span-1">
-          <VehicleInfoCard vehicle={vehicle} />
-        </div>
-
-        <div className="xl:col-span-3">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div className="lg:col-span-3 order-1">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
             <TabsList className={`grid w-full ${isFleetAdmin ? 'grid-cols-5' : 'grid-cols-4'} bg-slate-100 p-1`}>
               <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Overview</TabsTrigger>
@@ -53,24 +49,24 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
               )}
             </TabsList>
             
-            <TabsContent value="overview" className="space-y-6 mt-6">
+            <TabsContent value="overview" className="space-y-4 mt-4">
               <VehicleOverviewTab isFleetAdmin={isFleetAdmin} setActiveTab={setActiveTab} vehicleStatus={vehicle.status} />
             </TabsContent>
 
-            <TabsContent value="booking" className="mt-6">
+            <TabsContent value="booking" className="mt-4">
               <VehicleBooking vehicle={vehicle} onVehicleUpdate={handleVehicleUpdated} />
             </TabsContent>
             
-            <TabsContent value="inspection" className="mt-6">
+            <TabsContent value="inspection" className="mt-4">
               <InspectionForm vehicle={vehicle} />
             </TabsContent>
             
-            <TabsContent value="maintenance" className="mt-6">
+            <TabsContent value="maintenance" className="mt-4">
               <MaintenanceForm vehicle={vehicle} />
             </TabsContent>
             
             {isFleetAdmin && (
-              <TabsContent value="admin" className="mt-6">
+              <TabsContent value="admin" className="mt-4">
                 <Card className="border-red-200 bg-red-50">
                   <CardHeader>
                     <CardTitle className="text-red-900 flex items-center gap-2">
@@ -91,6 +87,10 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
               </TabsContent>
             )}
           </Tabs>
+        </div>
+
+        <div className="lg:col-span-3 order-2">
+          <VehicleInfoCard vehicle={vehicle} />
         </div>
       </div>
     </div>

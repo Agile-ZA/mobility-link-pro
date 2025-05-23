@@ -43,17 +43,18 @@ const BookVehicleSection = ({ vehicle, userId, onVehicleUpdate }: BookVehicleSec
   };
 
   return (
-    <div className="space-y-4">
-      <p className="text-slate-600 mb-4">
-        This vehicle is available for booking. Click below to assign it to yourself.
+    <div className="space-y-3">
+      <p className="text-slate-600 text-sm">
+        This vehicle is available for booking.
       </p>
       <Button 
         onClick={handleBookVehicle}
-        className="w-full bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
+        className="w-full bg-blue-600 hover:bg-blue-700 flex items-center justify-center gap-2 py-5"
         disabled={isLoading}
+        size="lg"
       >
-        <Car className="w-4 h-4" />
-        {isLoading ? 'Booking...' : 'Book Vehicle'}
+        <Car className="w-5 h-5" />
+        <span className="font-medium">{isLoading ? 'Booking...' : 'Book Vehicle'}</span>
       </Button>
     </div>
   );

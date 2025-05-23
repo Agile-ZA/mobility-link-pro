@@ -70,7 +70,7 @@ const MaintenanceForm = ({ vehicle }: MaintenanceFormProps) => {
     
     toast({
       title: "Maintenance Request Submitted",
-      description: `Maintenance request for ${vehicle.registrationNumber} has been submitted successfully.`,
+      description: `Maintenance request for ${vehicle.registration_number} has been submitted successfully.`,
     });
 
     // Reset form

@@ -41,7 +41,7 @@ const InspectionForm = ({ vehicle }: InspectionFormProps) => {
     
     toast({
       title: "Inspection Submitted Successfully",
-      description: `Vehicle inspection for ${vehicle.registrationNumber} has been recorded and will be synchronized with SAP.`,
+      description: `Vehicle inspection for ${vehicle.registration_number} has been recorded and will be synchronized with SAP.`,
     });
 
     // Reset form

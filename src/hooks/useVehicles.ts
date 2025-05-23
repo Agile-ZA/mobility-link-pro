@@ -2,30 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-
-export interface Vehicle {
-  id: string;
-  registration_number: string;
-  type: 'truck' | 'forklift' | 'car';
-  make: string;
-  model: string;
-  year: number;
-  status: 'available' | 'booked' | 'maintenance' | 'damaged';
-  image_url: string;
-  mileage?: number;
-  operating_hours?: number;
-  location: string;
-  last_inspection: string;
-  next_maintenance: string;
-  fuel_level?: number;
-  battery_level?: number;
-  current_user_id?: string;
-  booked_at?: string;
-  profile?: {
-    full_name: string;
-    email: string;
-  };
-}
+import { Vehicle } from '@/types/vehicle';
 
 export const useVehicles = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -43,7 +20,13 @@ export const useVehicles = () => {
 
       if (error) throw error;
 
-      setVehicles(data || []);
+      // Cast the data to ensure proper typing
+      const typedVehicles = (data || []).map(vehicle => ({
+        ...vehicle,
+        type: vehicle.type as 'truck' | 'forklift' | 'car'
+      })) as Vehicle[];
+
+      setVehicles(typedVehicles);
     } catch (error) {
       console.error('Error fetching vehicles:', error);
       toast({

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Vehicle, VehicleReadings } from "@/types/vehicle";
 import { Button } from "@/components/ui/button";
@@ -51,7 +50,7 @@ const ReadingsForm = ({ vehicle }: ReadingsFormProps) => {
     
     toast({
       title: "Readings Captured",
-      description: `Readings for ${vehicle.registrationNumber} have been recorded successfully.`,
+      description: `Readings for ${vehicle.registration_number} have been recorded successfully.`,
     });
 
     // Reset form and close dialog

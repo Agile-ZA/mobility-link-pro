@@ -21,8 +21,8 @@ export const useBookingHistory = (vehicleId?: string) => {
         .from('booking_history')
         .select(`
           *,
-          profile:profiles!user_id(full_name, email),
-          vehicle:vehicles!vehicle_id(registration_number, make, model)
+          profile:profiles!booking_history_user_id_fkey(full_name, email),
+          vehicle:vehicles!booking_history_vehicle_id_fkey(registration_number, make, model)
         `)
         .order('booked_at', { ascending: false });
 

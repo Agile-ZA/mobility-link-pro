@@ -1,4 +1,5 @@
-import { Vehicle } from "@/hooks/useVehicles";
+
+import { Vehicle } from "@/types/vehicle";
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";

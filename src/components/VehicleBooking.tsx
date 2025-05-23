@@ -1,5 +1,7 @@
+
 import { useState } from "react";
-import { Vehicle, useVehicles } from "@/hooks/useVehicles";
+import { Vehicle } from "@/types/vehicle";
+import { useVehicles } from "@/hooks/useVehicles";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";

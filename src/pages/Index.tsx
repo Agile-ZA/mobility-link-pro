@@ -5,7 +5,7 @@ import VehicleList from "@/components/VehicleList";
 import VehicleDetail from "@/components/VehicleDetail";
 import AuthPage from "@/components/AuthPage";
 import UserHeader from "@/components/UserHeader";
-import { Vehicle } from "@/hooks/useVehicles";
+import { Vehicle } from "@/types/vehicle";
 import { Loader2 } from "lucide-react";
 
 const Index = () => {

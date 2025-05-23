@@ -1,5 +1,7 @@
+
 import { useMemo } from "react";
-import { useVehicles, Vehicle } from "@/hooks/useVehicles";
+import { useVehicles } from "@/hooks/useVehicles";
+import { Vehicle } from "@/types/vehicle";
 import { useAuth } from "@/hooks/useAuth";
 import VehicleCard from "./VehicleCard";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";

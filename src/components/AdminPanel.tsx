@@ -4,9 +4,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useUserRole } from "@/hooks/useUserRole";
-import { useVehicles } from "@/hooks/useVehicles";
+import { useAdminVehicles } from "@/hooks/useAdminVehicles";
 import AddVehicleForm from "./AddVehicleForm";
+import VehicleEditForm from "./VehicleEditForm";
 import { Plus, Edit, ArrowLeft, Users, Car, BarChart3 } from "lucide-react";
+import { Vehicle } from "@/types/vehicle";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface AdminPanelProps {
   onNavigateBack: () => void;
@@ -14,11 +17,17 @@ interface AdminPanelProps {
 
 const AdminPanel = ({ onNavigateBack }: AdminPanelProps) => {
   const { userRole } = useUserRole();
-  const { vehicles, fetchVehicles } = useVehicles();
+  const { vehicles, fetchVehicles } = useAdminVehicles();
   const [showAddForm, setShowAddForm] = useState(false);
+  const [editingVehicle, setEditingVehicle] = useState<Vehicle | null>(null);
 
   const handleAddSuccess = () => {
     setShowAddForm(false);
+    fetchVehicles();
+  };
+
+  const handleEditSuccess = () => {
+    setEditingVehicle(null);
     fetchVehicles();
   };
 
@@ -45,6 +54,27 @@ const AdminPanel = ({ onNavigateBack }: AdminPanelProps) => {
         <AddVehicleForm 
           onSuccess={handleAddSuccess}
           onCancel={() => setShowAddForm(false)}
+        />
+      </div>
+    );
+  }
+
+  if (editingVehicle) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="ghost"
+            onClick={() => setEditingVehicle(null)}
+            className="flex items-center gap-2"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Admin Panel
+          </Button>
+        </div>
+        <VehicleEditForm 
+          vehicle={editingVehicle}
+          onSuccess={handleEditSuccess}
         />
       </div>
     );
@@ -152,20 +182,6 @@ const AdminPanel = ({ onNavigateBack }: AdminPanelProps) => {
                   <div className="text-xs opacity-90">Expand the fleet</div>
                 </div>
               </Button>
-              
-              <Button 
-                variant="outline"
-                className="h-16 flex flex-col items-center justify-center space-y-2 border-blue-300 hover:bg-blue-50"
-                onClick={() => {
-                  console.log("Vehicle edit functionality");
-                }}
-              >
-                <Edit className="w-5 h-5" />
-                <div className="text-center">
-                  <div className="font-semibold">Edit Vehicles</div>
-                  <div className="text-xs text-slate-600">Modify vehicle details</div>
-                </div>
-              </Button>
             </div>
           </CardContent>
         </Card>
@@ -212,6 +228,76 @@ const AdminPanel = ({ onNavigateBack }: AdminPanelProps) => {
           </CardContent>
         </Card>
       </div>
+
+      {/* All Vehicles Table */}
+      <Card className="border-slate-200">
+        <CardHeader>
+          <CardTitle className="text-slate-900 flex items-center gap-2">
+            <Edit className="w-5 h-5" />
+            All Vehicles ({vehicles.length})
+          </CardTitle>
+          <p className="text-slate-600 text-sm">
+            View and edit all vehicles in the fleet
+          </p>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Registration</TableHead>
+                <TableHead>Vehicle</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Site</TableHead>
+                <TableHead>Current User</TableHead>
+                <TableHead>Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {vehicles.map((vehicle) => (
+                <TableRow key={vehicle.id}>
+                  <TableCell className="font-medium">{vehicle.registration_number}</TableCell>
+                  <TableCell>{vehicle.make} {vehicle.model} ({vehicle.year})</TableCell>
+                  <TableCell className="capitalize">{vehicle.type}</TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant={
+                        vehicle.status === 'available' ? 'default' :
+                        vehicle.status === 'booked' ? 'secondary' :
+                        vehicle.status === 'maintenance' ? 'destructive' : 'outline'
+                      }
+                    >
+                      {vehicle.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {vehicle.site?.name || 'No site assigned'}
+                  </TableCell>
+                  <TableCell>
+                    {vehicle.profile?.full_name || vehicle.profile?.email || 'Unassigned'}
+                  </TableCell>
+                  <TableCell>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setEditingVehicle(vehicle)}
+                      className="flex items-center gap-1"
+                    >
+                      <Edit className="w-3 h-3" />
+                      Edit
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+          {vehicles.length === 0 && (
+            <div className="text-center py-8 text-slate-500">
+              No vehicles found. Add your first vehicle to get started.
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };

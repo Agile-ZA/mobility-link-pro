@@ -1,12 +1,47 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useState } from "react";
+import VehicleList from "@/components/VehicleList";
+import VehicleDetail from "@/components/VehicleDetail";
+import { Vehicle } from "@/types/vehicle";
 
 const Index = () => {
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+
+  const handleVehicleSelect = (vehicle: Vehicle) => {
+    setSelectedVehicle(vehicle);
+  };
+
+  const handleBackToList = () => {
+    setSelectedVehicle(null);
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-gray-600">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center">
+              <div className="flex-shrink-0">
+                <h1 className="text-2xl font-bold text-gray-900">Fleet Manager</h1>
+              </div>
+            </div>
+            <div className="text-sm text-gray-500">
+              Corporate Vehicle Management System
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {selectedVehicle ? (
+          <VehicleDetail 
+            vehicle={selectedVehicle} 
+            onBack={handleBackToList}
+          />
+        ) : (
+          <VehicleList onVehicleSelect={handleVehicleSelect} />
+        )}
+      </main>
     </div>
   );
 };

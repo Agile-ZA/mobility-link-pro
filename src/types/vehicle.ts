@@ -6,7 +6,7 @@ export interface Vehicle {
   make: string;
   model: string;
   year: number;
-  isAvailable: boolean;
+  status: 'available' | 'booked' | 'maintenance' | 'damaged';
   imageUrl: string;
   mileage?: number;
   operatingHours?: number;
@@ -15,6 +15,11 @@ export interface Vehicle {
   nextMaintenance: string;
   fuelLevel?: number;
   batteryLevel?: number;
+  currentUser?: {
+    name: string;
+    id: string;
+    bookedAt: string;
+  };
 }
 
 export interface InspectionData {
@@ -46,5 +51,15 @@ export interface VehicleReadings {
   };
   fuelLevel?: number;
   batteryLevel?: number;
+  timestamp: string;
+}
+
+export interface VehicleReturn {
+  vehicleId: string;
+  odometer: number;
+  operatingHours?: number;
+  image?: File;
+  comments?: string;
+  returnedBy: string;
   timestamp: string;
 }

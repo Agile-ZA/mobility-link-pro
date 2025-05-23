@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 
-// Updated mock data with better image URLs
+// Updated mock data with new status system
 const mockVehicles: Vehicle[] = [
   {
     id: "1",
@@ -15,7 +15,7 @@ const mockVehicles: Vehicle[] = [
     make: "Ford",
     model: "F-150",
     year: 2022,
-    isAvailable: true,
+    status: "available",
     imageUrl: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13",
     mileage: 45000,
     location: "Main Distribution Center",
@@ -30,13 +30,18 @@ const mockVehicles: Vehicle[] = [
     make: "Toyota",
     model: "8FGU25",
     year: 2021,
-    isAvailable: false,
+    status: "booked",
     imageUrl: "https://images.unsplash.com/photo-1586936893354-362ad6ae47ba",
     operatingHours: 2500,
     location: "Warehouse Complex A",
     lastInspection: "2024-05-10",
     nextMaintenance: "2024-06-10",
-    batteryLevel: 85
+    batteryLevel: 85,
+    currentUser: {
+      name: "John Smith",
+      id: "user-001",
+      bookedAt: "2024-05-22T08:30:00Z"
+    }
   },
   {
     id: "3",
@@ -45,7 +50,7 @@ const mockVehicles: Vehicle[] = [
     make: "Toyota",
     model: "Camry Hybrid",
     year: 2023,
-    isAvailable: true,
+    status: "maintenance",
     imageUrl: "https://images.unsplash.com/photo-1555215695-3004980ad54e",
     mileage: 12000,
     location: "Executive Office Complex",
@@ -60,7 +65,7 @@ const mockVehicles: Vehicle[] = [
     make: "Chevrolet",
     model: "Silverado 2500HD",
     year: 2021,
-    isAvailable: true,
+    status: "damaged",
     imageUrl: "https://images.unsplash.com/photo-1558618047-3c8c76ca7d13",
     mileage: 67000,
     location: "North Distribution Hub",
@@ -75,23 +80,40 @@ interface VehicleListProps {
 }
 
 const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
+  const [vehicles, setVehicles] = useState<Vehicle[]>(mockVehicles);
   const [selectedType, setSelectedType] = useState<string>("all");
-  const [showAvailableOnly, setShowAvailableOnly] = useState(false);
+  const [selectedStatus, setSelectedStatus] = useState<string>("all");
+
+  const handleVehicleStatusUpdate = (vehicleId: string, newStatus: Vehicle['status'], userData?: Vehicle['currentUser']) => {
+    setVehicles(prevVehicles =>
+      prevVehicles.map(vehicle =>
+        vehicle.id === vehicleId
+          ? {
+              ...vehicle,
+              status: newStatus,
+              currentUser: newStatus === 'booked' ? userData : undefined
+            }
+          : vehicle
+      )
+    );
+  };
 
   const filteredVehicles = useMemo(() => {
-    return mockVehicles.filter(vehicle => {
+    return vehicles.filter(vehicle => {
       const typeMatch = selectedType === "all" || vehicle.type === selectedType;
-      const availabilityMatch = !showAvailableOnly || vehicle.isAvailable;
-      return typeMatch && availabilityMatch;
+      const statusMatch = selectedStatus === "all" || vehicle.status === selectedStatus;
+      return typeMatch && statusMatch;
     });
-  }, [selectedType, showAvailableOnly]);
+  }, [vehicles, selectedType, selectedStatus]);
 
   const stats = useMemo(() => {
-    const total = mockVehicles.length;
-    const available = mockVehicles.filter(v => v.isAvailable).length;
-    const inUse = total - available;
-    return { total, available, inUse };
-  }, []);
+    const total = vehicles.length;
+    const available = vehicles.filter(v => v.status === 'available').length;
+    const booked = vehicles.filter(v => v.status === 'booked').length;
+    const maintenance = vehicles.filter(v => v.status === 'maintenance').length;
+    const damaged = vehicles.filter(v => v.status === 'damaged').length;
+    return { total, available, booked, maintenance, damaged };
+  }, [vehicles]);
 
   return (
     <div className="space-y-6">
@@ -102,12 +124,12 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
         </div>
         
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
           <Card className="border-slate-200">
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">Total Vehicles</p>
+                  <p className="text-sm font-medium text-slate-600">Total</p>
                   <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
                 </div>
                 <div className="w-8 h-8 bg-slate-100 rounded-lg flex items-center justify-center">
@@ -135,11 +157,39 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-slate-600">In Use</p>
-                  <p className="text-2xl font-bold text-amber-700">{stats.inUse}</p>
+                  <p className="text-sm font-medium text-slate-600">Booked</p>
+                  <p className="text-2xl font-bold text-blue-700">{stats.booked}</p>
+                </div>
+                <div className="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
+                  👤
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-200">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-600">Maintenance</p>
+                  <p className="text-2xl font-bold text-amber-700">{stats.maintenance}</p>
                 </div>
                 <div className="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center">
-                  🔄
+                  🔧
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className="border-slate-200">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium text-slate-600">Damaged</p>
+                  <p className="text-2xl font-bold text-red-700">{stats.damaged}</p>
+                </div>
+                <div className="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
+                  ⚠️
                 </div>
               </div>
             </CardContent>
@@ -162,14 +212,19 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
                     <SelectItem value="car">Executive Vehicles</SelectItem>
                   </SelectContent>
                 </Select>
-                
-                <Button
-                  variant={showAvailableOnly ? "default" : "outline"}
-                  onClick={() => setShowAvailableOnly(!showAvailableOnly)}
-                  className={`w-full sm:w-auto ${showAvailableOnly ? 'bg-slate-900 hover:bg-slate-800' : 'border-slate-300 hover:bg-slate-50'}`}
-                >
-                  {showAvailableOnly ? "Showing Available Only" : "Show Available Only"}
-                </Button>
+
+                <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                  <SelectTrigger className="w-full sm:w-48 border-slate-300">
+                    <SelectValue placeholder="Filter by status" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-slate-200">
+                    <SelectItem value="all">All Statuses</SelectItem>
+                    <SelectItem value="available">Available</SelectItem>
+                    <SelectItem value="booked">Booked</SelectItem>
+                    <SelectItem value="maintenance">Maintenance</SelectItem>
+                    <SelectItem value="damaged">Damaged</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="text-sm text-slate-600">
@@ -186,6 +241,7 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
             key={vehicle.id}
             vehicle={vehicle}
             onSelect={() => onVehicleSelect(vehicle)}
+            onStatusUpdate={handleVehicleStatusUpdate}
           />
         ))}
       </div>

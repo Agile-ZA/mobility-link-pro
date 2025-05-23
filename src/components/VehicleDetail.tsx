@@ -8,6 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import InspectionForm from "./InspectionForm";
 import MaintenanceForm from "./MaintenanceForm";
 import ReadingsForm from "./ReadingsForm";
+import VehicleBooking from "./VehicleBooking";
 import { ArrowLeft } from "lucide-react";
 
 interface VehicleDetailProps {
@@ -17,6 +18,15 @@ interface VehicleDetailProps {
 
 const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
   const [activeTab, setActiveTab] = useState("overview");
+  const [currentVehicle, setCurrentVehicle] = useState<Vehicle>(vehicle);
+
+  const handleStatusUpdate = (vehicleId: string, newStatus: Vehicle['status'], userData?: Vehicle['currentUser']) => {
+    setCurrentVehicle(prev => ({
+      ...prev,
+      status: newStatus,
+      currentUser: newStatus === 'booked' ? userData : undefined
+    }));
+  };
 
   const getVehicleTypeLabel = (type: string) => {
     switch (type) {
@@ -31,6 +41,36 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
     }
   };
 
+  const getStatusBadgeClass = (status: Vehicle['status']) => {
+    switch (status) {
+      case 'available':
+        return 'bg-green-600 hover:bg-green-700 text-white';
+      case 'booked':
+        return 'bg-blue-600 hover:bg-blue-700 text-white';
+      case 'maintenance':
+        return 'bg-amber-600 hover:bg-amber-700 text-white';
+      case 'damaged':
+        return 'bg-red-600 hover:bg-red-700 text-white';
+      default:
+        return '';
+    }
+  };
+
+  const getStatusLabel = (status: Vehicle['status']) => {
+    switch (status) {
+      case 'available':
+        return 'Available for Use';
+      case 'booked':
+        return 'Currently Booked';
+      case 'maintenance':
+        return 'Maintenance Required';
+      case 'damaged':
+        return 'Damaged - Out of Service';
+      default:
+        return 'Unknown Status';
+    }
+  };
+
   const getImageUrl = (originalUrl: string) => {
     if (originalUrl.includes('unsplash.com')) {
       const imageId = originalUrl.split('photo-')[1]?.split('?')[0];
@@ -38,7 +78,7 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
         return `https://images.unsplash.com/photo-${imageId}?w=600&h=400&fit=crop&auto=format`;
       }
     }
-    return `https://via.placeholder.com/600x400/e2e8f0/475569?text=${encodeURIComponent(vehicle.type.toUpperCase())}`;
+    return `https://via.placeholder.com/600x400/e2e8f0/475569?text=${encodeURIComponent(currentVehicle.type.toUpperCase())}`;
   };
 
   return (
@@ -55,15 +95,14 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
         <div className="flex-1">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-slate-900">{vehicle.registrationNumber}</h1>
-              <p className="text-slate-600 text-lg">{vehicle.make} {vehicle.model} • {vehicle.year}</p>
-              <p className="text-slate-500 text-sm">{getVehicleTypeLabel(vehicle.type)}</p>
+              <h1 className="text-3xl font-bold text-slate-900">{currentVehicle.registrationNumber}</h1>
+              <p className="text-slate-600 text-lg">{currentVehicle.make} {currentVehicle.model} • {currentVehicle.year}</p>
+              <p className="text-slate-500 text-sm">{getVehicleTypeLabel(currentVehicle.type)}</p>
             </div>
             <Badge 
-              variant={vehicle.isAvailable ? "default" : "destructive"}
-              className={`text-base px-4 py-2 ${vehicle.isAvailable ? "bg-green-600 hover:bg-green-700" : ""}`}
+              className={`text-base px-4 py-2 ${getStatusBadgeClass(currentVehicle.status)}`}
             >
-              {vehicle.isAvailable ? "Available for Use" : "Currently In Use"}
+              {getStatusLabel(currentVehicle.status)}
             </Badge>
           </div>
         </div>
@@ -155,8 +194,9 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
 
         <div className="xl:col-span-3">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 bg-slate-100 p-1">
+            <TabsList className="grid w-full grid-cols-4 bg-slate-100 p-1">
               <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Overview</TabsTrigger>
+              <TabsTrigger value="booking" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Booking</TabsTrigger>
               <TabsTrigger value="inspection" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Inspection</TabsTrigger>
               <TabsTrigger value="maintenance" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Maintenance</TabsTrigger>
             </TabsList>
@@ -169,13 +209,24 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
                 <CardContent>
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <Button 
-                      onClick={() => setActiveTab("inspection")}
+                      onClick={() => setActiveTab("booking")}
                       className="h-24 flex flex-col items-center justify-center space-y-3 bg-slate-900 hover:bg-slate-800"
+                    >
+                      <span className="text-3xl">🔑</span>
+                      <div className="text-center">
+                        <div className="font-semibold">Book/Return Vehicle</div>
+                        <div className="text-xs opacity-90">Manage vehicle usage</div>
+                      </div>
+                    </Button>
+                    <Button 
+                      onClick={() => setActiveTab("inspection")}
+                      variant="outline"
+                      className="h-24 flex flex-col items-center justify-center space-y-3 border-slate-300 hover:bg-slate-50"
                     >
                       <span className="text-3xl">📋</span>
                       <div className="text-center">
                         <div className="font-semibold">Vehicle Inspection</div>
-                        <div className="text-xs opacity-90">Capture condition & location</div>
+                        <div className="text-xs text-slate-600">Capture condition & location</div>
                       </div>
                     </Button>
                     <Button 
@@ -189,20 +240,21 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
                         <div className="text-xs text-slate-600">Schedule service</div>
                       </div>
                     </Button>
-                    <div className="h-24">
-                      <ReadingsForm vehicle={vehicle} />
-                    </div>
                   </div>
                 </CardContent>
               </Card>
             </TabsContent>
+
+            <TabsContent value="booking" className="mt-6">
+              <VehicleBooking vehicle={currentVehicle} onStatusUpdate={handleStatusUpdate} />
+            </TabsContent>
             
             <TabsContent value="inspection" className="mt-6">
-              <InspectionForm vehicle={vehicle} />
+              <InspectionForm vehicle={currentVehicle} />
             </TabsContent>
             
             <TabsContent value="maintenance" className="mt-6">
-              <MaintenanceForm vehicle={vehicle} />
+              <MaintenanceForm vehicle={currentVehicle} />
             </TabsContent>
           </Tabs>
         </div>

@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 interface VehicleCardProps {
   vehicle: Vehicle;
   onSelect: () => void;
+  onStatusUpdate: (vehicleId: string, newStatus: Vehicle['status'], userData?: Vehicle['currentUser']) => void;
 }
 
 const VehicleCard = ({ vehicle, onSelect }: VehicleCardProps) => {
@@ -32,6 +33,51 @@ const VehicleCard = ({ vehicle, onSelect }: VehicleCardProps) => {
         return 'Executive Vehicle';
       default:
         return 'Fleet Vehicle';
+    }
+  };
+
+  const getStatusBadgeVariant = (status: Vehicle['status']) => {
+    switch (status) {
+      case 'available':
+        return 'default';
+      case 'booked':
+        return 'secondary';
+      case 'maintenance':
+        return 'outline';
+      case 'damaged':
+        return 'destructive';
+      default:
+        return 'outline';
+    }
+  };
+
+  const getStatusBadgeClass = (status: Vehicle['status']) => {
+    switch (status) {
+      case 'available':
+        return 'bg-green-600 hover:bg-green-700 text-white';
+      case 'booked':
+        return 'bg-blue-600 hover:bg-blue-700 text-white';
+      case 'maintenance':
+        return 'bg-amber-600 hover:bg-amber-700 text-white';
+      case 'damaged':
+        return 'bg-red-600 hover:bg-red-700 text-white';
+      default:
+        return '';
+    }
+  };
+
+  const getStatusLabel = (status: Vehicle['status']) => {
+    switch (status) {
+      case 'available':
+        return 'Available';
+      case 'booked':
+        return 'Booked';
+      case 'maintenance':
+        return 'Maintenance';
+      case 'damaged':
+        return 'Damaged';
+      default:
+        return 'Unknown';
     }
   };
 
@@ -65,10 +111,10 @@ const VehicleCard = ({ vehicle, onSelect }: VehicleCardProps) => {
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
         <div className="absolute top-3 right-3">
           <Badge 
-            variant={vehicle.isAvailable ? "default" : "destructive"}
-            className={vehicle.isAvailable ? "bg-green-600 hover:bg-green-700" : ""}
+            variant={getStatusBadgeVariant(vehicle.status)}
+            className={getStatusBadgeClass(vehicle.status)}
           >
-            {vehicle.isAvailable ? "Available" : "In Use"}
+            {getStatusLabel(vehicle.status)}
           </Badge>
         </div>
         <div className="absolute bottom-3 left-3">
@@ -90,6 +136,17 @@ const VehicleCard = ({ vehicle, onSelect }: VehicleCardProps) => {
               </p>
             </div>
           </div>
+
+          {vehicle.status === 'booked' && vehicle.currentUser && (
+            <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
+              <p className="text-blue-900 text-sm font-medium">
+                👤 {vehicle.currentUser.name}
+              </p>
+              <p className="text-blue-700 text-xs mt-1">
+                Booked: {new Date(vehicle.currentUser.bookedAt).toLocaleDateString()}
+              </p>
+            </div>
+          )}
           
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-slate-600">
             <div className="flex items-center space-x-2">

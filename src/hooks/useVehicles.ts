@@ -4,49 +4,28 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Vehicle } from '@/types/vehicle';
 import { useAuth } from '@/hooks/useAuth';
+import { useUserRole } from '@/hooks/useUserRole';
 
 export const useVehicles = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const { user } = useAuth();
+  const { isFleetAdmin } = useUserRole();
 
   const fetchVehicles = async () => {
     try {
       setLoading(true);
       
-      // First get the user's site_id
-      let userSiteId = null;
-      
-      if (user) {
-        const { data: profileData } = await supabase
-          .from('profiles')
-          .select('site_id')
-          .eq('id', user.id)
-          .single();
-          
-        if (profileData) {
-          userSiteId = profileData.site_id;
-        }
-      }
-      
-      // Now fetch vehicles
-      let query = supabase
+      // Fleet admins can see all vehicles, regular users see vehicles from all sites
+      // (filtering will be done in the UI)
+      const { data, error } = await supabase
         .from('vehicles')
         .select(`
           *,
           profile:profiles(full_name, email),
           site:sites(name, location)
         `);
-      
-      // If user has a site_id and is not a fleet admin, filter by site
-      if (userSiteId) {
-        // Note: RLS will enforce site-based filtering regardless,
-        // but we're adding this for clarity and efficiency
-        query = query.eq('site_id', userSiteId);
-      }
-      
-      const { data, error } = await query;
 
       if (error) throw error;
 

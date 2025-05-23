@@ -18,24 +18,33 @@ interface VehicleListProps {
 const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
   const { vehicles, loading } = useVehicles();
   const { user } = useAuth();
-  const { userSite, loading: siteLoading } = useSites();
+  const { sites, userSite, loading: siteLoading } = useSites();
   const [selectedType, setSelectedType] = useState<string>("all");
   const [selectedStatus, setSelectedStatus] = useState<string>("available");
+  const [selectedSite, setSelectedSite] = useState<string>("my-site");
 
-  // Filter vehicles to show available by default, or user's assigned vehicle
+  // Filter vehicles based on selected filters
   const filteredVehicles = useMemo(() => {
     return vehicles.filter(vehicle => {
       const typeMatch = selectedType === "all" || vehicle.type === selectedType;
       const statusMatch = selectedStatus === "all" || vehicle.status === selectedStatus;
       
-      // If showing "available" status, also include vehicles assigned to current user
-      if (selectedStatus === "available" && vehicle.status === "booked" && vehicle.current_user_id === user?.id) {
-        return typeMatch;
+      // Site filtering
+      let siteMatch = true;
+      if (selectedSite === "my-site") {
+        siteMatch = vehicle.site_id === userSite?.id;
+      } else if (selectedSite !== "all") {
+        siteMatch = vehicle.site_id === selectedSite;
       }
       
-      return typeMatch && statusMatch;
+      // If showing "available" status, also include vehicles assigned to current user
+      if (selectedStatus === "available" && vehicle.status === "booked" && vehicle.current_user_id === user?.id) {
+        return typeMatch && siteMatch;
+      }
+      
+      return typeMatch && statusMatch && siteMatch;
     });
-  }, [vehicles, selectedType, selectedStatus, user?.id]);
+  }, [vehicles, selectedType, selectedStatus, selectedSite, user?.id, userSite?.id]);
 
   // Get user's assigned vehicle
   const userVehicle = vehicles.find(v => v.current_user_id === user?.id);
@@ -177,11 +186,26 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
           <CardContent className="p-4">
             <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
               <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                <Select value={selectedSite} onValueChange={setSelectedSite}>
+                  <SelectTrigger className="w-full sm:w-48 border-slate-300">
+                    <SelectValue placeholder="Filter by site" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-slate-200 z-50">
+                    <SelectItem value="my-site">My Site ({userSite?.name || 'None'})</SelectItem>
+                    <SelectItem value="all">All Sites</SelectItem>
+                    {sites.map((site) => (
+                      <SelectItem key={site.id} value={site.id}>
+                        {site.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
                 <Select value={selectedType} onValueChange={setSelectedType}>
                   <SelectTrigger className="w-full sm:w-48 border-slate-300">
                     <SelectValue placeholder="Filter by vehicle type" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-slate-200">
+                  <SelectContent className="bg-white border-slate-200 z-50">
                     <SelectItem value="all">All Vehicle Types</SelectItem>
                     <SelectItem value="truck">Commercial Trucks</SelectItem>
                     <SelectItem value="forklift">Industrial Forklifts</SelectItem>
@@ -193,7 +217,7 @@ const VehicleList = ({ onVehicleSelect }: VehicleListProps) => {
                   <SelectTrigger className="w-full sm:w-48 border-slate-300">
                     <SelectValue placeholder="Filter by status" />
                   </SelectTrigger>
-                  <SelectContent className="bg-white border-slate-200">
+                  <SelectContent className="bg-white border-slate-200 z-50">
                     <SelectItem value="available">Available to Book</SelectItem>
                     <SelectItem value="all">All Statuses</SelectItem>
                     <SelectItem value="booked">Booked</SelectItem>

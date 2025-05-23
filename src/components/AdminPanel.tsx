@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,7 +27,7 @@ const AdminPanel = ({ onNavigateBack }: AdminPanelProps) => {
 
   const handleEditSuccess = () => {
     setEditingVehicle(null);
-    fetchVehicles();
+    fetchVehicles(); // This should refresh the vehicle list
   };
 
   const stats = {

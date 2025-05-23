@@ -35,10 +35,25 @@ export const getStatusLabel = (status: Vehicle['status']) => {
   }
 };
 
+export const getStatusBadgeText = (status: Vehicle['status']) => {
+  switch (status) {
+    case 'available':
+      return 'Available';
+    case 'booked':
+      return 'Booked';
+    case 'maintenance':
+      return 'Maintenance';
+    case 'damaged':
+      return 'Damaged';
+    default:
+      return 'Unknown';
+  }
+};
+
 const VehicleStatusBadge = ({ status }: VehicleStatusBadgeProps) => {
   return (
-    <div className={`w-8 h-8 ${getStatusBadgeColor(status)} rounded-lg flex items-center justify-center`}>
-      <span className="text-white text-xs font-bold">!</span>
+    <div className={`px-2 py-1 ${getStatusBadgeColor(status)} rounded-md flex items-center justify-center min-w-[70px]`}>
+      <span className="text-white text-xs font-semibold">{getStatusBadgeText(status)}</span>
     </div>
   );
 };

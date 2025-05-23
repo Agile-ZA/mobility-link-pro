@@ -1,3 +1,4 @@
+
 import { Vehicle } from "@/types/vehicle";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";

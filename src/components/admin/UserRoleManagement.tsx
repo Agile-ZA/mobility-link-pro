@@ -12,7 +12,7 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { useUserManagement, UserWithRole } from "@/hooks/useUserManagement";
-import { UserRole } from "@/hooks/useUserRole";
+import { UserRole, useUserRole } from "@/hooks/useUserRole";
 import { Users } from "lucide-react";
 import { Loader2 } from "lucide-react";
 
@@ -22,6 +22,7 @@ interface UserRoleManagementProps {
 
 const UserRoleManagement = ({ isOpen }: UserRoleManagementProps) => {
   const { users, loading, assignRole, removeRole } = useUserManagement();
+  const { userRole } = useUserRole();
   
   if (!isOpen) return null;
 
@@ -46,6 +47,13 @@ const UserRoleManagement = ({ isOpen }: UserRoleManagementProps) => {
     } else {
       assignRole(userId, value as UserRole);
     }
+  };
+
+  // Fleet admins cannot assign admin roles
+  const canAssignRole = (role: UserRole) => {
+    if (userRole === 'admin') return true;
+    if (userRole === 'fleet_admin' && role !== 'admin') return true;
+    return false;
   };
 
   return (
@@ -102,7 +110,9 @@ const UserRoleManagement = ({ isOpen }: UserRoleManagementProps) => {
                           <SelectItem value="">No Role</SelectItem>
                           <SelectItem value="user">User</SelectItem>
                           <SelectItem value="fleet_admin">Fleet Admin</SelectItem>
-                          <SelectItem value="admin">Admin</SelectItem>
+                          {userRole === 'admin' && (
+                            <SelectItem value="admin">Admin</SelectItem>
+                          )}
                         </SelectContent>
                       </Select>
                     </TableCell>

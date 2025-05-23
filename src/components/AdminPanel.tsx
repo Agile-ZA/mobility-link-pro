@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useUserRole } from "@/hooks/useUserRole";
@@ -17,7 +18,7 @@ interface AdminPanelProps {
 }
 
 const AdminPanel = ({ onNavigateBack }: AdminPanelProps) => {
-  const { userRole, isAdmin } = useUserRole();
+  const { userRole, isFleetAdmin } = useUserRole();
   const { vehicles, fetchVehicles } = useAdminVehicles();
   const [showAddForm, setShowAddForm] = useState(false);
   const [showUserManagement, setShowUserManagement] = useState(false);
@@ -97,10 +98,10 @@ const AdminPanel = ({ onNavigateBack }: AdminPanelProps) => {
         onAddVehicle={() => setShowAddForm(true)}
         onManageUsers={() => setShowUserManagement(!showUserManagement)}
         stats={stats}
-        showUserManagement={isAdmin}
+        showUserManagement={isFleetAdmin}
       />
 
-      <UserRoleManagement isOpen={showUserManagement && isAdmin} />
+      <UserRoleManagement isOpen={showUserManagement && isFleetAdmin} />
 
       <AdminVehicleTable 
         vehicles={vehicles}

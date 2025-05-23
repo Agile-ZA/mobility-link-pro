@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import VehicleList from "@/components/VehicleList";
@@ -27,6 +26,11 @@ const Index = () => {
 
   const handleNavigation = (view: 'vehicles' | 'admin') => {
     setCurrentView(view);
+    setSelectedVehicle(null);
+  };
+
+  const handleLogoClick = () => {
+    setCurrentView('vehicles');
     setSelectedVehicle(null);
   };
 
@@ -68,11 +72,14 @@ const Index = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center">
+              <button
+                onClick={handleLogoClick}
+                className="w-10 h-10 bg-slate-900 rounded-lg flex items-center justify-center hover:bg-slate-800 transition-colors cursor-pointer"
+              >
                 <span className="text-white font-bold text-lg">FM</span>
-              </div>
+              </button>
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">Fleet Manager</h1>
+                <h1 className="text-2xl font-bold text-slate-900">SAP Fleet Manager</h1>
                 <p className="text-sm text-slate-600">Enterprise Vehicle Management</p>
               </div>
             </div>

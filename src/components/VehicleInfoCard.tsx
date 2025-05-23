@@ -15,6 +15,18 @@ const VehicleInfoCard = ({ vehicle }: VehicleInfoCardProps) => {
         <CardTitle className="text-slate-900 text-lg">Vehicle Information</CardTitle>
       </CardHeader>
       <CardContent className="p-0">
+        {/* Vehicle Image Section */}
+        <div className="p-4 border-b border-slate-100">
+          <div className="flex justify-center">
+            <img 
+              src={vehicle.image_url || "/lovable-uploads/5fcb470f-dbe9-462f-9cc3-5d929e79425f.png"} 
+              alt={`${vehicle.make} ${vehicle.model}`}
+              className="w-48 h-32 object-cover rounded-lg border border-slate-200"
+            />
+          </div>
+        </div>
+        
+        {/* Vehicle Details Grid */}
         <div className="grid grid-cols-2 sm:grid-cols-4 divide-y sm:divide-y-0 divide-slate-100">
           <div className="p-3 border-r border-slate-100">
             <p className="text-xs font-medium text-slate-500">Registration</p>

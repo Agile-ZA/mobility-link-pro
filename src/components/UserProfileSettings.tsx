@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useSites } from "@/hooks/useSites";
 import { useAuth } from "@/hooks/useAuth";
@@ -6,19 +5,23 @@ import {
   Dialog, 
   DialogContent, 
   DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+  DialogTitle
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Settings, Eye, EyeOff } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 
-const UserProfileSettings = () => {
-  const [isOpen, setIsOpen] = useState(false);
+interface UserProfileSettingsProps {
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+}
+
+const UserProfileSettings = ({ isOpen, onOpenChange }: UserProfileSettingsProps) => {
+  const [internalOpen, setInternalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'site' | 'password'>('site');
   const { sites, userSite, updateUserSite } = useSites();
   const { user } = useAuth();
@@ -35,6 +38,10 @@ const UserProfileSettings = () => {
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   
+  // Use external control if provided, otherwise use internal state
+  const dialogOpen = isOpen !== undefined ? isOpen : internalOpen;
+  const setDialogOpen = onOpenChange || setInternalOpen;
+  
   useEffect(() => {
     if (userSite) {
       setSelectedSiteId(userSite.id);
@@ -42,7 +49,7 @@ const UserProfileSettings = () => {
   }, [userSite]);
   
   const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
+    setDialogOpen(open);
     if (open && userSite) {
       setSelectedSiteId(userSite.id);
     } else if (open) {
@@ -77,7 +84,7 @@ const UserProfileSettings = () => {
         title: "Site Updated",
         description: "Your site assignment has been updated successfully.",
       });
-      setIsOpen(false);
+      setDialogOpen(false);
     } else {
       toast({
         title: "Update Failed",
@@ -153,7 +160,7 @@ const UserProfileSettings = () => {
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
-        setIsOpen(false);
+        setDialogOpen(false);
       }
     } catch (error) {
       toast({
@@ -167,12 +174,7 @@ const UserProfileSettings = () => {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Profile Settings">
-          <Settings className="h-4 w-4" />
-        </Button>
-      </DialogTrigger>
+    <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Profile Settings</DialogTitle>
@@ -312,7 +314,7 @@ const UserProfileSettings = () => {
           )}
           
           <div className="flex justify-end gap-3">
-            <Button variant="outline" onClick={() => setIsOpen(false)}>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
               Cancel
             </Button>
             {activeTab === 'site' && (

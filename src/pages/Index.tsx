@@ -1,10 +1,10 @@
+
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import VehicleList from "@/components/VehicleList";
 import VehicleDetail from "@/components/VehicleDetail";
 import AuthPage from "@/components/AuthPage";
 import UserHeader from "@/components/UserHeader";
-import UserProfileSettings from "@/components/UserProfileSettings";
 import AdminPanel from "@/components/AdminPanel";
 import { Vehicle } from "@/types/vehicle";
 import { Loader2 } from "lucide-react";
@@ -112,10 +112,7 @@ const Index = () => {
                   <span>System Online</span>
                 </div>
               </nav>
-              <div className="flex items-center gap-2">
-                <UserProfileSettings />
-                <UserHeader />
-              </div>
+              <UserHeader />
             </div>
           </div>
         </div>

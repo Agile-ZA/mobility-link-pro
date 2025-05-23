@@ -14,7 +14,7 @@ export interface BookingHistory {
   profile?: {
     full_name: string;
     email: string;
-  };
+  } | null;
   vehicle?: {
     registration_number: string;
     make: string;

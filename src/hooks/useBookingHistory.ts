@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -31,7 +30,6 @@ export const useBookingHistory = (vehicleId?: string) => {
           return_operating_hours,
           comments,
           created_at,
-          profiles(full_name, email),
           vehicles(registration_number, make, model)
         `)
         .order('booked_at', { ascending: false });
@@ -41,12 +39,33 @@ export const useBookingHistory = (vehicleId?: string) => {
         query = query.eq('vehicle_id', vehicleId);
       }
 
-      const { data, error } = await query;
+      const { data: bookingData, error } = await query;
 
       if (error) throw error;
 
+      // Now fetch profile data separately for each user_id
+      const userIds = [...new Set(bookingData?.map(record => record.user_id) || [])];
+      
+      let profilesData: { [key: string]: { full_name: string; email: string } } = {};
+      
+      if (userIds.length > 0) {
+        const { data: profiles, error: profilesError } = await supabase
+          .from('profiles')
+          .select('id, full_name, email')
+          .in('id', userIds);
+
+        if (profilesError) {
+          console.error('Error fetching profiles:', profilesError);
+        } else {
+          profilesData = profiles?.reduce((acc, profile) => {
+            acc[profile.id] = { full_name: profile.full_name, email: profile.email };
+            return acc;
+          }, {} as { [key: string]: { full_name: string; email: string } }) || {};
+        }
+      }
+
       // Transform the data to match our BookingHistory type
-      const transformedData: BookingHistory[] = (data || []).map(record => ({
+      const transformedData: BookingHistory[] = (bookingData || []).map(record => ({
         id: record.id,
         vehicle_id: record.vehicle_id,
         user_id: record.user_id,
@@ -58,7 +77,7 @@ export const useBookingHistory = (vehicleId?: string) => {
         return_operating_hours: record.return_operating_hours,
         comments: record.comments,
         created_at: record.created_at,
-        profile: record.profiles,
+        profile: profilesData[record.user_id] || null,
         vehicle: record.vehicles
       }));
 

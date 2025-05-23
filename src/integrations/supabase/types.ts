@@ -9,6 +9,56 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      booking_history: {
+        Row: {
+          booked_at: string
+          comments: string | null
+          created_at: string
+          id: string
+          initial_mileage: number | null
+          initial_operating_hours: number | null
+          return_mileage: number | null
+          return_operating_hours: number | null
+          returned_at: string | null
+          user_id: string
+          vehicle_id: string
+        }
+        Insert: {
+          booked_at: string
+          comments?: string | null
+          created_at?: string
+          id?: string
+          initial_mileage?: number | null
+          initial_operating_hours?: number | null
+          return_mileage?: number | null
+          return_operating_hours?: number | null
+          returned_at?: string | null
+          user_id: string
+          vehicle_id: string
+        }
+        Update: {
+          booked_at?: string
+          comments?: string | null
+          created_at?: string
+          id?: string
+          initial_mileage?: number | null
+          initial_operating_hours?: number | null
+          return_mileage?: number | null
+          return_operating_hours?: number | null
+          returned_at?: string | null
+          user_id?: string
+          vehicle_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "booking_history_vehicle_id_fkey"
+            columns: ["vehicle_id"]
+            isOneToOne: false
+            referencedRelation: "vehicles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string

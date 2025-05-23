@@ -5,6 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Vehicle } from '@/types/vehicle';
 import { useAuth } from '@/hooks/useAuth';
 import { useUserRole } from '@/hooks/useUserRole';
+import { useBookingHistory } from '@/hooks/useBookingHistory';
 
 export const useVehicles = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -12,6 +13,7 @@ export const useVehicles = () => {
   const { toast } = useToast();
   const { user } = useAuth();
   const { isFleetAdmin } = useUserRole();
+  const { createBookingHistory, updateBookingHistory } = useBookingHistory();
 
   const fetchVehicles = async () => {
     try {
@@ -50,16 +52,37 @@ export const useVehicles = () => {
 
   const bookVehicle = async (vehicleId: string, userId: string) => {
     try {
+      // Get the current vehicle data to capture initial readings
+      const { data: vehicleData, error: vehicleError } = await supabase
+        .from('vehicles')
+        .select('mileage, operating_hours')
+        .eq('id', vehicleId)
+        .single();
+
+      if (vehicleError) throw vehicleError;
+
+      const bookedAt = new Date().toISOString();
+
+      // Update vehicle status
       const { error } = await supabase
         .from('vehicles')
         .update({
           status: 'booked',
           current_user_id: userId,
-          booked_at: new Date().toISOString(),
+          booked_at: bookedAt,
         })
         .eq('id', vehicleId);
 
       if (error) throw error;
+
+      // Create booking history record
+      await createBookingHistory({
+        vehicle_id: vehicleId,
+        user_id: userId,
+        booked_at: bookedAt,
+        initial_mileage: vehicleData.mileage,
+        initial_operating_hours: vehicleData.operating_hours,
+      });
 
       await fetchVehicles();
       return { success: true };
@@ -69,8 +92,23 @@ export const useVehicles = () => {
     }
   };
 
-  const returnVehicle = async (vehicleId: string, updates: { mileage?: number; operating_hours?: number }) => {
+  const returnVehicle = async (vehicleId: string, updates: { mileage?: number; operating_hours?: number; comments?: string }) => {
     try {
+      // Get current booking to find the active booking history record
+      const { data: currentBooking, error: bookingError } = await supabase
+        .from('booking_history')
+        .select('id')
+        .eq('vehicle_id', vehicleId)
+        .is('returned_at', null)
+        .single();
+
+      if (bookingError && bookingError.code !== 'PGRST116') {
+        throw bookingError;
+      }
+
+      const returnedAt = new Date().toISOString();
+
+      // Update vehicle status
       const updateData: any = {
         status: 'available',
         current_user_id: null,
@@ -86,6 +124,16 @@ export const useVehicles = () => {
         .eq('id', vehicleId);
 
       if (error) throw error;
+
+      // Update booking history record if it exists
+      if (currentBooking) {
+        await updateBookingHistory(currentBooking.id, {
+          returned_at: returnedAt,
+          return_mileage: updates.mileage,
+          return_operating_hours: updates.operating_hours,
+          comments: updates.comments,
+        });
+      }
 
       await fetchVehicles();
       return { success: true };

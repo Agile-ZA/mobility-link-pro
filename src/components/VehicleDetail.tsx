@@ -9,7 +9,9 @@ import VehicleEditForm from "./VehicleEditForm";
 import VehicleHeader from "./VehicleHeader";
 import VehicleInfoCard from "./VehicleInfoCard";
 import VehicleOverviewTab from "./VehicleOverviewTab";
+import BookingHistoryTable from "./BookingHistoryTable";
 import { useUserRole } from "@/hooks/useUserRole";
+import { useBookingHistory } from "@/hooks/useBookingHistory";
 import { useState } from "react";
 
 interface VehicleDetailProps {
@@ -20,6 +22,7 @@ interface VehicleDetailProps {
 const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
   const [activeTab, setActiveTab] = useState("overview");
   const { isFleetAdmin, loading } = useUserRole();
+  const { bookingHistory, loading: historyLoading } = useBookingHistory(vehicle.id);
 
   console.log("User role check:", { isFleetAdmin, loading }); // Debug log
 
@@ -39,13 +42,16 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-3 order-1">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className={`grid w-full ${isFleetAdmin ? 'grid-cols-5' : 'grid-cols-4'} bg-slate-100 p-1`}>
+            <TabsList className={`grid w-full ${isFleetAdmin ? 'grid-cols-6' : 'grid-cols-4'} bg-slate-100 p-1`}>
               <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Overview</TabsTrigger>
               <TabsTrigger value="booking" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Booking</TabsTrigger>
               <TabsTrigger value="inspection" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Inspection</TabsTrigger>
               <TabsTrigger value="maintenance" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Maintenance</TabsTrigger>
               {isFleetAdmin && (
-                <TabsTrigger value="admin" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-red-600 font-semibold">Admin</TabsTrigger>
+                <>
+                  <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">History</TabsTrigger>
+                  <TabsTrigger value="admin" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-red-600 font-semibold">Admin</TabsTrigger>
+                </>
               )}
             </TabsList>
             
@@ -64,6 +70,16 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
             <TabsContent value="maintenance" className="mt-4">
               <MaintenanceForm vehicle={vehicle} />
             </TabsContent>
+            
+            {isFleetAdmin && (
+              <TabsContent value="history" className="mt-4">
+                <BookingHistoryTable 
+                  bookingHistory={bookingHistory} 
+                  loading={historyLoading}
+                  showVehicleInfo={false}
+                />
+              </TabsContent>
+            )}
             
             {isFleetAdmin && (
               <TabsContent value="admin" className="mt-4">

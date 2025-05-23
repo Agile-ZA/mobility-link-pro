@@ -1,0 +1,87 @@
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Edit } from "lucide-react";
+import { Vehicle } from "@/types/vehicle";
+
+interface AdminVehicleTableProps {
+  vehicles: Vehicle[];
+  onEditVehicle: (vehicle: Vehicle) => void;
+}
+
+const AdminVehicleTable = ({ vehicles, onEditVehicle }: AdminVehicleTableProps) => {
+  return (
+    <Card className="border-slate-200">
+      <CardHeader>
+        <CardTitle className="text-slate-900 flex items-center gap-2">
+          <Edit className="w-5 h-5" />
+          All Vehicles ({vehicles.length})
+        </CardTitle>
+        <p className="text-slate-600 text-sm">
+          View and edit all vehicles in the fleet
+        </p>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Registration</TableHead>
+              <TableHead>Vehicle</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead>Site</TableHead>
+              <TableHead>Current User</TableHead>
+              <TableHead>Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {vehicles.map((vehicle) => (
+              <TableRow key={vehicle.id}>
+                <TableCell className="font-medium">{vehicle.registration_number}</TableCell>
+                <TableCell>{vehicle.make} {vehicle.model} ({vehicle.year})</TableCell>
+                <TableCell className="capitalize">{vehicle.type}</TableCell>
+                <TableCell>
+                  <Badge 
+                    variant={
+                      vehicle.status === 'available' ? 'default' :
+                      vehicle.status === 'booked' ? 'secondary' :
+                      vehicle.status === 'maintenance' ? 'destructive' : 'outline'
+                    }
+                  >
+                    {vehicle.status}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  {vehicle.site?.name || 'No site assigned'}
+                </TableCell>
+                <TableCell>
+                  {vehicle.profile?.full_name || vehicle.profile?.email || 'Unassigned'}
+                </TableCell>
+                <TableCell>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onEditVehicle(vehicle)}
+                    className="flex items-center gap-1"
+                  >
+                    <Edit className="w-3 h-3" />
+                    Edit
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        {vehicles.length === 0 && (
+          <div className="text-center py-8 text-slate-500">
+            No vehicles found. Add your first vehicle to get started.
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+};
+
+export default AdminVehicleTable;

@@ -2,9 +2,12 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { Vehicle } from "@/types/vehicle";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
+import { useSites } from "@/hooks/useSites";
 import VehicleBasicInfo from "./VehicleBasicInfo";
 import VehicleStatusInfo from "./VehicleStatusInfo";
 import VehicleMetrics from "./VehicleMetrics";
@@ -17,6 +20,7 @@ interface VehicleEditFormProps {
 
 const VehicleEditForm = ({ vehicle, onSuccess }: VehicleEditFormProps) => {
   const { toast } = useToast();
+  const { sites } = useSites();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     registration_number: vehicle.registration_number,
@@ -30,7 +34,8 @@ const VehicleEditForm = ({ vehicle, onSuccess }: VehicleEditFormProps) => {
     operating_hours: vehicle.operating_hours?.toString() || '',
     fuel_level: vehicle.fuel_level?.toString() || '',
     battery_level: vehicle.battery_level?.toString() || '',
-    image_url: vehicle.image_url || ''
+    image_url: vehicle.image_url || '',
+    site_id: vehicle.site_id || ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -50,7 +55,8 @@ const VehicleEditForm = ({ vehicle, onSuccess }: VehicleEditFormProps) => {
         operating_hours: formData.operating_hours ? parseInt(formData.operating_hours) : null,
         fuel_level: formData.fuel_level ? parseInt(formData.fuel_level) : null,
         battery_level: formData.battery_level ? parseInt(formData.battery_level) : null,
-        image_url: formData.image_url || null
+        image_url: formData.image_url || null,
+        site_id: formData.site_id || null
       };
 
       const { error } = await supabase
@@ -94,6 +100,27 @@ const VehicleEditForm = ({ vehicle, onSuccess }: VehicleEditFormProps) => {
             <VehicleStatusInfo formData={formData} onInputChange={handleInputChange} />
             <VehicleMetrics formData={formData} onInputChange={handleInputChange} />
             <VehicleImageSection formData={formData} onInputChange={handleInputChange} />
+            
+            {/* Site Assignment Section */}
+            <div className="space-y-2">
+              <Label htmlFor="site_id">Site Assignment</Label>
+              <Select 
+                value={formData.site_id} 
+                onValueChange={(value) => handleInputChange('site_id', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a site" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">No site assignment</SelectItem>
+                  {sites.map((site) => (
+                    <SelectItem key={site.id} value={site.id}>
+                      {site.name} {site.location ? `(${site.location})` : ''}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="flex gap-4 pt-4">

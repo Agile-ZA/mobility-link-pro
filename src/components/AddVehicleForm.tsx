@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -22,7 +23,7 @@ const AddVehicleForm = ({ onSuccess, onCancel }: AddVehicleFormProps) => {
     make: '',
     model: '',
     year: '',
-    type: 'truck',
+    type: 'truck' as 'truck' | 'forklift' | 'car',
     location: '',
     last_inspection: new Date().toISOString().split('T')[0],
     next_maintenance: new Date().toISOString().split('T')[0],
@@ -34,7 +35,11 @@ const AddVehicleForm = ({ onSuccess, onCancel }: AddVehicleFormProps) => {
   const { toast } = useToast();
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    if (field === 'type') {
+      setFormData(prev => ({ ...prev, [field]: value as 'truck' | 'forklift' | 'car' }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
+    }
   };
 
   const handleSubmit = async (e: any) => {
@@ -55,6 +60,7 @@ const AddVehicleForm = ({ onSuccess, onCancel }: AddVehicleFormProps) => {
     const vehicleData: Partial<Vehicle> = {
       ...formData,
       year: parseInt(formData.year),
+      status: 'available' as 'available' | 'booked' | 'maintenance' | 'damaged',
     };
 
     const result = await addVehicle(vehicleData);

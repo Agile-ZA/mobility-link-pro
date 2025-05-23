@@ -15,7 +15,7 @@ export const useVehicleOperations = () => {
       // Make sure site_id is included in the data
       const { error } = await supabase
         .from('vehicles')
-        .insert([vehicleData]);
+        .insert(vehicleData);
         
       if (error) throw error;
       

@@ -6,6 +6,7 @@ import { Plus, BarChart3, Users } from "lucide-react";
 interface AdminActionsProps {
   onAddVehicle: () => void;
   onManageUsers: () => void;
+  showUserManagement?: boolean;
   stats: {
     total: number;
     available: number;
@@ -14,7 +15,7 @@ interface AdminActionsProps {
   };
 }
 
-const AdminActions = ({ onAddVehicle, onManageUsers, stats }: AdminActionsProps) => {
+const AdminActions = ({ onAddVehicle, onManageUsers, showUserManagement = false, stats }: AdminActionsProps) => {
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       <Card className="border-blue-200 bg-blue-50">
@@ -40,17 +41,19 @@ const AdminActions = ({ onAddVehicle, onManageUsers, stats }: AdminActionsProps)
               </div>
             </Button>
             
-            <Button 
-              onClick={onManageUsers}
-              variant="outline"
-              className="h-auto py-4 px-6 flex items-center justify-center gap-3 border-blue-300 text-blue-700 hover:bg-blue-100"
-            >
-              <Users className="w-5 h-5" />
-              <div className="text-center">
-                <div className="font-semibold text-base">Manage Users</div>
-                <div className="text-sm opacity-90">Assign roles and permissions</div>
-              </div>
-            </Button>
+            {showUserManagement && (
+              <Button 
+                onClick={onManageUsers}
+                variant="outline"
+                className="h-auto py-4 px-6 flex items-center justify-center gap-3 border-blue-300 text-blue-700 hover:bg-blue-100"
+              >
+                <Users className="w-5 h-5" />
+                <div className="text-center">
+                  <div className="font-semibold text-base">Manage Users</div>
+                  <div className="text-sm opacity-90">Assign roles and permissions</div>
+                </div>
+              </Button>
+            )}
           </div>
         </CardContent>
       </Card>

@@ -19,7 +19,9 @@ interface VehicleDetailProps {
 
 const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
   const [activeTab, setActiveTab] = useState("overview");
-  const { isFleetAdmin } = useUserRole();
+  const { isFleetAdmin, loading } = useUserRole();
+
+  console.log("User role check:", { isFleetAdmin, loading }); // Debug log
 
   const getVehicleTypeLabel = (type: string) => {
     switch (type) {
@@ -75,6 +77,10 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
     // Refresh the page or refetch data
     window.location.reload();
   };
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -195,7 +201,7 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
               <TabsTrigger value="inspection" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Inspection</TabsTrigger>
               <TabsTrigger value="maintenance" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Maintenance</TabsTrigger>
               {isFleetAdmin && (
-                <TabsTrigger value="admin" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Admin</TabsTrigger>
+                <TabsTrigger value="admin" className="data-[state=active]:bg-white data-[state=active]:shadow-sm text-red-600 font-semibold">Admin</TabsTrigger>
               )}
             </TabsList>
             
@@ -239,6 +245,21 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
                       </div>
                     </Button>
                   </div>
+                  
+                  {isFleetAdmin && (
+                    <div className="mt-6 pt-6 border-t border-slate-200">
+                      <div className="text-center">
+                        <Button 
+                          onClick={() => setActiveTab("admin")}
+                          variant="outline"
+                          className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700"
+                        >
+                          <span className="text-xl mr-2">⚙️</span>
+                          Admin Controls
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -257,10 +278,23 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
             
             {isFleetAdmin && (
               <TabsContent value="admin" className="mt-6">
-                <VehicleEditForm 
-                  vehicle={vehicle} 
-                  onSuccess={handleVehicleUpdated}
-                />
+                <Card className="border-red-200 bg-red-50">
+                  <CardHeader>
+                    <CardTitle className="text-red-900 flex items-center gap-2">
+                      <span className="text-xl">⚙️</span>
+                      Administrator Functions
+                    </CardTitle>
+                    <p className="text-red-700 text-sm">
+                      Manage and edit vehicle details. Changes are permanent and will affect all users.
+                    </p>
+                  </CardHeader>
+                  <CardContent>
+                    <VehicleEditForm 
+                      vehicle={vehicle} 
+                      onSuccess={handleVehicleUpdated}
+                    />
+                  </CardContent>
+                </Card>
               </TabsContent>
             )}
           </Tabs>

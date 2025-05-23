@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { useUserRole } from "@/hooks/useUserRole";
 import AddVehicleForm from "./AddVehicleForm";
 import { Vehicle } from "@/types/vehicle";
-import { plus, edit } from "lucide-react";
+import { Plus, Edit } from "lucide-react";
 
 interface FleetAdminPanelProps {
   onVehicleAdded: () => void;
@@ -58,7 +58,7 @@ const FleetAdminPanel = ({ onVehicleAdded, onEditVehicle }: FleetAdminPanelProps
             onClick={() => setShowAddForm(true)}
             className="h-20 flex flex-col items-center justify-center space-y-2 bg-blue-600 hover:bg-blue-700"
           >
-            <plus className="w-6 h-6" />
+            <Plus className="w-6 h-6" />
             <div className="text-center">
               <div className="font-semibold">Add New Vehicle</div>
               <div className="text-xs opacity-90">Expand the fleet</div>
@@ -73,7 +73,7 @@ const FleetAdminPanel = ({ onVehicleAdded, onEditVehicle }: FleetAdminPanelProps
               console.log("Edit mode functionality can be implemented here");
             }}
           >
-            <edit className="w-6 h-6" />
+            <Edit className="w-6 h-6" />
             <div className="text-center">
               <div className="font-semibold">Edit Vehicles</div>
               <div className="text-xs text-slate-600">Modify vehicle details</div>

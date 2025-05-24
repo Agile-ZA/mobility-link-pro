@@ -5,6 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import VehicleHeader from "./VehicleHeader";
 import VehicleInfoCard from "./VehicleInfoCard";
 import VehicleOverviewTab from "./VehicleOverviewTab";
+import VehicleBooking from "./VehicleBooking";
 import BookingHistoryTable from "./BookingHistoryTable";
 import InspectionForm from "./InspectionForm";
 import MaintenanceForm from "./MaintenanceForm";
@@ -76,8 +77,9 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         <div className="lg:col-span-3 order-1">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-            <TabsList className={`grid w-full ${isFleetAdmin ? 'grid-cols-2' : 'grid-cols-1'} bg-slate-100 p-1`}>
+            <TabsList className={`grid w-full ${isFleetAdmin ? 'grid-cols-3' : 'grid-cols-2'} bg-slate-100 p-1`}>
               <TabsTrigger value="overview" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Overview</TabsTrigger>
+              <TabsTrigger value="booking" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">Booking</TabsTrigger>
               {isFleetAdmin && (
                 <TabsTrigger value="history" className="data-[state=active]:bg-white data-[state=active]:shadow-sm">History</TabsTrigger>
               )}
@@ -90,6 +92,13 @@ const VehicleDetail = ({ vehicle, onBack }: VehicleDetailProps) => {
                 vehicleStatus={vehicle.status}
                 onInspectionClick={handleInspectionClick}
                 onMaintenanceClick={handleMaintenanceClick}
+              />
+            </TabsContent>
+
+            <TabsContent value="booking" className="mt-4">
+              <VehicleBooking 
+                vehicle={vehicle} 
+                onVehicleUpdate={handleVehicleUpdated} 
               />
             </TabsContent>
 

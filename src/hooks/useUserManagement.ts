@@ -4,11 +4,11 @@ import { useUserRoleOperations } from "@/hooks/useUserRoleOperations";
 import { useUserSiteOperations } from "@/hooks/useUserSiteOperations";
 import { useSites } from "@/hooks/useSites";
 
-export { User, UserWithRole };
+export type { User, UserWithRole };
 
 export const useUserManagement = () => {
   const { data: users = [], isLoading: isLoadingUsers } = useUsers();
-  const { sites, isLoading: isLoadingSites } = useSites();
+  const { sites, loading: isLoadingSites } = useSites();
   const { assignRole, removeRole, loading: roleLoading } = useUserRoleOperations();
   const { updateUserSite, loading: siteLoading } = useUserSiteOperations();
 

@@ -4,7 +4,8 @@ import { Vehicle } from "@/types/vehicle";
 import { useVehicles } from "@/hooks/useVehicles";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Car } from "lucide-react";
+import { Car, CheckCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface BookVehicleSectionProps {
   vehicle: Vehicle;
@@ -14,6 +15,7 @@ interface BookVehicleSectionProps {
 
 const BookVehicleSection = ({ vehicle, userId, onVehicleUpdate }: BookVehicleSectionProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isBooked, setIsBooked] = useState(false);
   const { bookVehicle } = useVehicles();
   const { toast } = useToast();
 
@@ -52,19 +54,23 @@ const BookVehicleSection = ({ vehicle, userId, onVehicleUpdate }: BookVehicleSec
       
       if (result.success) {
         console.log("Booking successful!");
+        setIsBooked(true);
+        
         toast({
           title: "✅ Vehicle Booked Successfully!",
           description: `${vehicle.registration_number} has been assigned to you. You can now use this vehicle.`,
         });
         
-        // Trigger page update
-        if (onVehicleUpdate) {
-          console.log("Calling onVehicleUpdate callback");
-          onVehicleUpdate();
-        } else {
-          console.log("No callback provided, reloading page");
-          window.location.reload();
-        }
+        // Trigger page update after a short delay to show the success state
+        setTimeout(() => {
+          if (onVehicleUpdate) {
+            console.log("Calling onVehicleUpdate callback");
+            onVehicleUpdate();
+          } else {
+            console.log("No callback provided, reloading page");
+            window.location.reload();
+          }
+        }, 2000);
       } else {
         console.error("Booking failed with result:", result);
         const errorMessage = result.error?.message || "Failed to book the vehicle. Please try again.";
@@ -86,6 +92,19 @@ const BookVehicleSection = ({ vehicle, userId, onVehicleUpdate }: BookVehicleSec
       setIsLoading(false);
     }
   };
+
+  if (isBooked) {
+    return (
+      <Alert className="border-green-200 bg-green-50">
+        <CheckCircle className="h-4 w-4 text-green-600" />
+        <AlertDescription className="text-green-800">
+          <strong>Vehicle Booked Successfully!</strong>
+          <br />
+          {vehicle.registration_number} has been assigned to you. The page will refresh shortly to show your booking.
+        </AlertDescription>
+      </Alert>
+    );
+  }
 
   return (
     <div className="space-y-3">

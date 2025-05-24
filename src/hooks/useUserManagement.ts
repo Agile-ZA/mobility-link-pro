@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
@@ -44,32 +43,43 @@ export const useUserManagement = () => {
     queryKey: ["admin-users"],
     queryFn: async () => {
       try {
-        // First get all profiles
+        console.log("Fetching users for user management...");
+        
+        // Get all profiles (this should include all users who have signed up)
         const { data: profiles, error: profilesError } = await supabase
           .from("profiles")
           .select("id, email, full_name, site_id");
 
         if (profilesError) {
+          console.error("Error fetching profiles:", profilesError);
           throw profilesError;
         }
 
-        // Then get all user roles
+        console.log("Profiles fetched:", profiles);
+
+        // Get all user roles
         const { data: userRoles, error: rolesError } = await supabase
           .from("user_roles")
           .select("user_id, role");
 
         if (rolesError) {
+          console.error("Error fetching user roles:", rolesError);
           throw rolesError;
         }
         
+        console.log("User roles fetched:", userRoles);
+
         // Get sites
         const { data: siteData, error: sitesError } = await supabase
           .from("sites")
           .select("id, name");
         
         if (sitesError) {
+          console.error("Error fetching sites:", sitesError);
           throw sitesError;
         }
+
+        console.log("Sites fetched:", siteData);
 
         // Map user roles to profiles
         const usersWithRoles: UserWithRole[] = profiles.map(profile => {
@@ -86,6 +96,7 @@ export const useUserManagement = () => {
           };
         });
         
+        console.log("Final users with roles:", usersWithRoles);
         return usersWithRoles;
       } catch (error) {
         console.error("Error fetching users:", error);

@@ -20,8 +20,6 @@ export const useVehicles = () => {
       setLoading(true);
       console.log("Fetching vehicles...");
       
-      // Fleet admins can see all vehicles, regular users see vehicles from all sites
-      // (filtering will be done in the UI)
       const { data, error } = await supabase
         .from('vehicles')
         .select(`
@@ -37,7 +35,6 @@ export const useVehicles = () => {
 
       console.log("Vehicles fetched successfully:", data);
 
-      // Cast the data to ensure proper typing
       const typedVehicles = (data || []).map(vehicle => ({
         ...vehicle,
         type: vehicle.type as 'truck' | 'forklift' | 'car'
@@ -57,27 +54,39 @@ export const useVehicles = () => {
   };
 
   const bookVehicle = async (vehicleId: string, userId: string) => {
-    console.log("bookVehicle called with:", { vehicleId, userId });
+    console.log("=== BOOK VEHICLE FUNCTION CALLED ===");
+    console.log("Parameters:", { vehicleId, userId });
     
+    if (!vehicleId || !userId) {
+      console.error("Missing required parameters:", { vehicleId, userId });
+      return { 
+        success: false, 
+        error: { message: "Missing vehicle ID or user ID" }
+      };
+    }
+
     try {
-      // Get the current vehicle data to capture initial readings
-      console.log("Fetching current vehicle data...");
+      // Get the current vehicle data
+      console.log("Step 1: Fetching current vehicle data...");
       const { data: vehicleData, error: vehicleError } = await supabase
         .from('vehicles')
-        .select('mileage, operating_hours, status')
+        .select('mileage, operating_hours, status, registration_number')
         .eq('id', vehicleId)
         .single();
 
       if (vehicleError) {
         console.error("Error fetching vehicle data:", vehicleError);
-        throw vehicleError;
+        return { 
+          success: false, 
+          error: { message: `Failed to fetch vehicle data: ${vehicleError.message}` }
+        };
       }
 
       console.log("Current vehicle data:", vehicleData);
 
       // Check if vehicle is still available
       if (vehicleData.status !== 'available') {
-        console.error("Vehicle is not available for booking, current status:", vehicleData.status);
+        console.error("Vehicle is not available, current status:", vehicleData.status);
         return { 
           success: false, 
           error: { message: `Vehicle is currently ${vehicleData.status} and cannot be booked.` }
@@ -85,11 +94,11 @@ export const useVehicles = () => {
       }
 
       const bookedAt = new Date().toISOString();
-      console.log("Booking vehicle at:", bookedAt);
+      console.log("Step 2: Booking vehicle at:", bookedAt);
 
       // Update vehicle status
-      console.log("Updating vehicle status...");
-      const { error } = await supabase
+      console.log("Step 3: Updating vehicle status to 'booked'...");
+      const { error: updateError } = await supabase
         .from('vehicles')
         .update({
           status: 'booked',
@@ -98,34 +107,48 @@ export const useVehicles = () => {
         })
         .eq('id', vehicleId);
 
-      if (error) {
-        console.error("Error updating vehicle status:", error);
-        throw error;
+      if (updateError) {
+        console.error("Error updating vehicle status:", updateError);
+        return { 
+          success: false, 
+          error: { message: `Failed to update vehicle: ${updateError.message}` }
+        };
       }
 
-      console.log("Vehicle status updated successfully");
+      console.log("Step 4: Vehicle status updated successfully");
 
-      // Create booking history record
-      console.log("Creating booking history record...");
-      const historyResult = await createBookingHistory({
-        vehicle_id: vehicleId,
-        user_id: userId,
-        booked_at: bookedAt,
-        initial_mileage: vehicleData.mileage,
-        initial_operating_hours: vehicleData.operating_hours,
-      });
+      // Create booking history record (non-blocking)
+      console.log("Step 5: Creating booking history record...");
+      try {
+        const historyResult = await createBookingHistory({
+          vehicle_id: vehicleId,
+          user_id: userId,
+          booked_at: bookedAt,
+          initial_mileage: vehicleData.mileage,
+          initial_operating_hours: vehicleData.operating_hours,
+        });
 
-      if (!historyResult.success) {
-        console.error("Failed to create booking history:", historyResult.error);
-        // Don't fail the booking if history creation fails, just log it
+        if (!historyResult.success) {
+          console.warn("Failed to create booking history (non-blocking):", historyResult.error);
+        } else {
+          console.log("Booking history created successfully");
+        }
+      } catch (historyError) {
+        console.warn("Error creating booking history (non-blocking):", historyError);
       }
 
-      console.log("Booking completed successfully");
+      console.log("Step 6: Refreshing vehicles list...");
       await fetchVehicles();
+      
+      console.log("=== BOOKING COMPLETED SUCCESSFULLY ===");
       return { success: true };
+      
     } catch (error) {
-      console.error('Error booking vehicle:', error);
-      return { success: false, error };
+      console.error('=== BOOKING ERROR ===', error);
+      return { 
+        success: false, 
+        error: { message: error instanceof Error ? error.message : 'Unknown error occurred' }
+      };
     }
   };
 

@@ -44,7 +44,7 @@ export const useUserRole = () => {
     };
 
     fetchUserRole();
-  }, [user]);
+  }, [user?.id]); // Only depend on user.id, not the entire user object
 
   const isFleetAdmin = userRole === 'fleet_admin' || userRole === 'admin';
   const isAdmin = userRole === 'admin';

@@ -18,6 +18,7 @@ export const useVehicles = () => {
   const fetchVehicles = async () => {
     try {
       setLoading(true);
+      console.log("Fetching vehicles...");
       
       // Fleet admins can see all vehicles, regular users see vehicles from all sites
       // (filtering will be done in the UI)
@@ -29,7 +30,12 @@ export const useVehicles = () => {
           site:sites(name, location)
         `);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error fetching vehicles:", error);
+        throw error;
+      }
+
+      console.log("Vehicles fetched successfully:", data);
 
       // Cast the data to ensure proper typing
       const typedVehicles = (data || []).map(vehicle => ({
@@ -51,19 +57,38 @@ export const useVehicles = () => {
   };
 
   const bookVehicle = async (vehicleId: string, userId: string) => {
+    console.log("bookVehicle called with:", { vehicleId, userId });
+    
     try {
       // Get the current vehicle data to capture initial readings
+      console.log("Fetching current vehicle data...");
       const { data: vehicleData, error: vehicleError } = await supabase
         .from('vehicles')
-        .select('mileage, operating_hours')
+        .select('mileage, operating_hours, status')
         .eq('id', vehicleId)
         .single();
 
-      if (vehicleError) throw vehicleError;
+      if (vehicleError) {
+        console.error("Error fetching vehicle data:", vehicleError);
+        throw vehicleError;
+      }
+
+      console.log("Current vehicle data:", vehicleData);
+
+      // Check if vehicle is still available
+      if (vehicleData.status !== 'available') {
+        console.error("Vehicle is not available for booking, current status:", vehicleData.status);
+        return { 
+          success: false, 
+          error: { message: `Vehicle is currently ${vehicleData.status} and cannot be booked.` }
+        };
+      }
 
       const bookedAt = new Date().toISOString();
+      console.log("Booking vehicle at:", bookedAt);
 
       // Update vehicle status
+      console.log("Updating vehicle status...");
       const { error } = await supabase
         .from('vehicles')
         .update({
@@ -73,10 +98,16 @@ export const useVehicles = () => {
         })
         .eq('id', vehicleId);
 
-      if (error) throw error;
+      if (error) {
+        console.error("Error updating vehicle status:", error);
+        throw error;
+      }
+
+      console.log("Vehicle status updated successfully");
 
       // Create booking history record
-      await createBookingHistory({
+      console.log("Creating booking history record...");
+      const historyResult = await createBookingHistory({
         vehicle_id: vehicleId,
         user_id: userId,
         booked_at: bookedAt,
@@ -84,6 +115,12 @@ export const useVehicles = () => {
         initial_operating_hours: vehicleData.operating_hours,
       });
 
+      if (!historyResult.success) {
+        console.error("Failed to create booking history:", historyResult.error);
+        // Don't fail the booking if history creation fails, just log it
+      }
+
+      console.log("Booking completed successfully");
       await fetchVehicles();
       return { success: true };
     } catch (error) {

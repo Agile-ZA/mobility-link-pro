@@ -18,28 +18,42 @@ const BookVehicleSection = ({ vehicle, userId, onVehicleUpdate }: BookVehicleSec
   const { toast } = useToast();
 
   const handleBookVehicle = async () => {
+    console.log("Attempting to book vehicle:", vehicle.id, "for user:", userId);
     setIsLoading(true);
-    const result = await bookVehicle(vehicle.id, userId);
     
-    if (result.success) {
-      toast({
-        title: "Vehicle Booked Successfully",
-        description: `${vehicle.registration_number} has been booked to you.`,
-      });
-      // Trigger page update
-      if (onVehicleUpdate) {
-        onVehicleUpdate();
+    try {
+      const result = await bookVehicle(vehicle.id, userId);
+      console.log("Book vehicle result:", result);
+      
+      if (result.success) {
+        toast({
+          title: "Vehicle Booked Successfully",
+          description: `${vehicle.registration_number} has been booked to you.`,
+        });
+        // Trigger page update
+        if (onVehicleUpdate) {
+          onVehicleUpdate();
+        } else {
+          window.location.reload();
+        }
       } else {
-        window.location.reload();
+        console.error("Booking failed:", result.error);
+        toast({
+          title: "Booking Failed",
+          description: result.error?.message || "Failed to book the vehicle. Please try again.",
+          variant: "destructive",
+        });
       }
-    } else {
+    } catch (error) {
+      console.error("Unexpected error during booking:", error);
       toast({
         title: "Booking Failed",
-        description: "Failed to book the vehicle. Please try again.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   };
 
   return (

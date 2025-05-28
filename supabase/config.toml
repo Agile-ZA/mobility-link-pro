@@ -61,4 +61,4 @@ max_frequency = "1s"
 secure_password_change = false
 
 [functions.vehicles-api]
-verify_jwt = false
+verify_jwt = true

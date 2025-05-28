@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -18,6 +17,66 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
     )
+
+    // Get the authorization header
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: 'Authorization header required' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Set the auth header for the supabase client
+    const { data: { user }, error: authError } = await supabaseClient.auth.getUser(
+      authHeader.replace('Bearer ', '')
+    );
+
+    if (authError || !user) {
+      console.error('Authentication error:', authError);
+      return new Response(
+        JSON.stringify({ error: 'Invalid authentication token' }),
+        { 
+          status: 401, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    // Check if user is fleet admin using the existing database function
+    const { data: isFleetAdmin, error: roleError } = await supabaseClient
+      .rpc('is_fleet_admin', { user_id: user.id });
+
+    if (roleError) {
+      console.error('Error checking user role:', roleError);
+      return new Response(
+        JSON.stringify({ error: 'Failed to verify user permissions' }),
+        { 
+          status: 500, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    if (!isFleetAdmin) {
+      return new Response(
+        JSON.stringify({ error: 'Fleet admin access required' }),
+        { 
+          status: 403, 
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
+        }
+      );
+    }
+
+    console.log('Authenticated fleet admin request:', { 
+      userId: user.id, 
+      email: user.email,
+      method: req.method, 
+      path: new URL(req.url).pathname 
+    });
 
     const url = new URL(req.url);
     const pathSegments = url.pathname.split('/');
